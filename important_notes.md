@@ -114,7 +114,7 @@ Both are on the 2080 Ti with identical recipes, so only the cut location differs
 | 17–23 | full |
 
 **Parameter matching:** same total cut as wave 1 (31,457,280) with the same destination (attention widening to 24 q / 4 kv heads), so it stays iso-parameter with runs 1–5.
-- **3 layers per block (as proposed):** 6 cut layers, so Δ ≈ 1707. Rounded to a multiple of 32: **Δ = 1696**, d_ff 2816 → **1120** (60% cut per layer). The mismatch is −196,608 parameters (−0.05% of total), well inside the 0.5% tolerance.
+- **3 layers per block (as proposed):** 6 cut layers, so Δ ≈ 1707. Rounded to a multiple of 32: **Δ = 1696**, d_ff 2816 → **1120** (60% cut per layer). It frees 196,608 fewer parameters than wave 1, so the total is +0.053% vs run 1 (checked with `ffnmem.params`), well inside the 0.5% tolerance.
 - **Caveat:** 60% per layer is much deeper than wave 1's 45%. If §3.4 (narrowing losses are convex in depth) holds, this could cost more than the location saves.
 - **Alternative at wave-1 depth:** 4 layers per block, cut 4–7 and 14–17 with Δ = 1280 (d_ff 1536). Exact parameter match. This isolates "location" from "depth" relative to run 2.
 
