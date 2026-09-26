@@ -1,0 +1,15 @@
+[params] local_gpu_sanity: embedding=33,554,432, attention=14,155,776, ffn=51,904,512, norms=13,312, memory_tables=17,825,792, memory_readout=4,600,320, total=122,054,144, non_embedding=88,499,712, active_non_embedding_per_token=70,682,112
+C:\Users\adity\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\torch\nn\functional.py:2954: UserWarning: Mismatch dtype between input and weight: input dtype = struct c10::Half, weight dtype = float, Cannot dispatch to fused implementation. (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\pytorch\aten\src\ATen\native\layer_norm.cpp:347.)
+  return torch.rms_norm(input, normalized_shape, weight, eps)
+step=1 loss=10.61 lr=2e-05 grad_norm=9.804 scale=6.554e+04 tokens=8192 tok_per_s=508.7 elapsed_s=16.1 peak_mem_gb=1.869 peak_reserved_gb=1.898
+step=10 loss=8.602 lr=0.0002 grad_norm=2.315 scale=6.554e+04 tokens=81920 tok_per_s=524.8 elapsed_s=156.6 peak_mem_gb=2.413 peak_reserved_gb=2.592
+step=20 loss=7.48 lr=0.0004 grad_norm=1.1 scale=6.554e+04 tokens=163840 tok_per_s=506.2 elapsed_s=318.4 peak_mem_gb=2.413 peak_reserved_gb=2.592
+step=30 loss=7.26 lr=0.0006 grad_norm=2.083 scale=6.554e+04 tokens=245760 tok_per_s=471.7 elapsed_s=492.1 peak_mem_gb=2.413 peak_reserved_gb=2.592
+step=40 loss=7.282 lr=0.0005985 grad_norm=1.395 scale=6.554e+04 tokens=327680 tok_per_s=512 elapsed_s=652.1 peak_mem_gb=2.413 peak_reserved_gb=2.592
+step=50 loss=6.945 lr=0.0005934 grad_norm=1.125 scale=6.554e+04 tokens=409600 tok_per_s=525.5 elapsed_s=808 peak_mem_gb=2.413 peak_reserved_gb=2.592
+step=60 loss=6.924 lr=0.0005848 grad_norm=3.335 scale=6.554e+04 tokens=491520 tok_per_s=507.2 elapsed_s=969.5 peak_mem_gb=2.413 peak_reserved_gb=2.592
+step=70 loss=6.65 lr=0.0005727 grad_norm=1.362 scale=6.554e+04 tokens=573440 tok_per_s=479.3 elapsed_s=1140 peak_mem_gb=2.413 peak_reserved_gb=2.592
+step=80 loss=6.574 lr=0.0005573 grad_norm=1.244 scale=6.554e+04 tokens=655360 tok_per_s=485.2 elapsed_s=1309 peak_mem_gb=2.413 peak_reserved_gb=2.592
+step=90 loss=6.358 lr=0.0005388 grad_norm=1.349 scale=6.554e+04 tokens=737280 tok_per_s=487.5 elapsed_s=1477 peak_mem_gb=2.413 peak_reserved_gb=2.592
+step=100 loss=6.471 lr=0.0005176 grad_norm=1.027 scale=6.554e+04 tokens=819200 tok_per_s=423.1 elapsed_s=1671 peak_mem_gb=2.413 peak_reserved_gb=2.592
+[eval] step=100 val_loss=6.174 val_ppl=480.3 mem1/sink_mass=0.4418 mem1/eff_codes_mean=8.598 mem1/frac_routes_eff_lt4=0 mem1/frac_routes_eff_lt2=0 mem1/dead_code_frac=0.1016 mem1/top_code_share=0.2863 mem4/sink_mass=0.2221 mem4/eff_codes_mean=5.55 mem4/frac_routes_eff_lt4=0.125 mem4/frac_routes_eff_lt2=0 mem4/dead_code_frac=0.2383 mem4/top_code_share=0.4391 elapsed_s=1699 table_grad_norm=0.02401 peak_mem_gb=2.413

@@ -1,0 +1,402 @@
+{
+  "dataset": "OptimalScale/ClimbMix",
+  "split": "train",
+  "tokenizer": "data/tokenizer",
+  "vocab_size": 32768,
+  "eos_id": 2,
+  "dtype": "uint16",
+  "byte_order": "little",
+  "seed": 42,
+  "shuffle_buffer": 10000,
+  "target_tokens": 100000000,
+  "shard_size_tokens": 25000000,
+  "val_file": "val.bin",
+  "val_tokens": 20000649,
+  "shards": [
+    {
+      "file": "shard_00000.bin",
+      "tokens": 25000359
+    },
+    {
+      "file": "shard_00001.bin",
+      "tokens": 25000702
+    },
+    {
+      "file": "shard_00002.bin",
+      "tokens": 25001433
+    },
+    {
+      "file": "shard_00003.bin",
+      "tokens": 25000288
+    }
+  ],
+  "total_tokens": 100002782,
+  "docs_seen": 162514,
+  "elapsed_seconds": 1838.9,
+  "complete": false,
+  "stream_state": {
+    "examples_iterable": {
+      "examples_iterable": {
+        "ex_iterable_idx": 0,
+        "previous_states": [
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 18283,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 16049,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17400,
+            "num_chunks_since_previous_state": 1351,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          },
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 17668,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 15022,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17400,
+            "num_chunks_since_previous_state": 2378,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          },
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 19714,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 16839,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17400,
+            "num_chunks_since_previous_state": 561,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          },
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 18212,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 15894,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17400,
+            "num_chunks_since_previous_state": 1506,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          },
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 20337,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 16288,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17400,
+            "num_chunks_since_previous_state": 1112,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          },
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 19610,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 15690,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17400,
+            "num_chunks_since_previous_state": 1710,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          },
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 19396,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 14575,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17400,
+            "num_chunks_since_previous_state": 2825,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          },
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 20573,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 16446,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17400,
+            "num_chunks_since_previous_state": 954,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          },
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 19004,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 16235,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17400,
+            "num_chunks_since_previous_state": 1165,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          },
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 19060,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 16352,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17400,
+            "num_chunks_since_previous_state": 1048,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          }
+        ],
+        "is_exhausted": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "type": "CyclingMultiSourcesExamplesIterable"
+      },
+      "previous_state": {
+        "ex_iterable_idx": 8,
+        "previous_states": [
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 18283,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 16049,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17400,
+            "num_chunks_since_previous_state": 1351,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          },
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 17668,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 15022,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17400,
+            "num_chunks_since_previous_state": 2378,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          },
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 19714,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 16839,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17400,
+            "num_chunks_since_previous_state": 561,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          },
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 18212,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 15894,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17400,
+            "num_chunks_since_previous_state": 1506,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          },
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 20337,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 16288,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17400,
+            "num_chunks_since_previous_state": 1112,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          },
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 19610,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 15690,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17400,
+            "num_chunks_since_previous_state": 1710,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          },
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 19396,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 14575,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17400,
+            "num_chunks_since_previous_state": 2825,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          },
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 20573,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 16446,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17400,
+            "num_chunks_since_previous_state": 954,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          },
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 19004,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 16235,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17399,
+            "num_chunks_since_previous_state": 1164,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          },
+          {
+            "examples_iterable": {
+              "shard_idx": 0,
+              "shard_example_idx": 19060,
+              "type": "ArrowExamplesIterable"
+            },
+            "previous_state": {
+              "shard_idx": 0,
+              "shard_example_idx": 16352,
+              "type": "ArrowExamplesIterable"
+            },
+            "batch_idx": 17399,
+            "num_chunks_since_previous_state": 1047,
+            "cropped_chunk_length": 0,
+            "type": "RebatchedArrowExamplesIterable"
+          }
+        ],
+        "is_exhausted": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "type": "CyclingMultiSourcesExamplesIterable"
+      },
+      "batch_idx": 164000,
+      "num_chunks_since_previous_state": 2,
+      "cropped_chunk_length": 0,
+      "type": "RebatchedArrowExamplesIterable"
+    },
+    "epoch": 0
+  }
+}

@@ -1,0 +1,21 @@
+aditya.shankar@ada.iiit.ac.in
+sparsh.bhartia@ada.iiit.ac.in
+
+dataset is stored in gnode066 /ssd_scratch/morbius/climbmix/climbmix
+might need to make job to copy and get access (pam slurm adopt thingy)
+
+Do not crowd home nfs storage quota is less. use ssd_scratch maybe
+
+finally only at the end when you runs are done maybe manually copy back final checkpoint to home nfs.
+
+aditya can only launch jobs standard partition (4 gpus) use 2080ti 
+
+sparsh bhartia can launch jobs on standard and plafnet2
+use standard 2080ti x 4 node and plafnet2 4x3090 both when you request you will get 4 gpu node anyway
+
+so 1 run on aditya and 2 runs on sparsh account simultaneously 
+
+make sure checkpoints are resumable but checkpointing overhead should be less. once every 3 hours ish is fine. 
+also keep track of what jobs you are launching on what nodes. 
+
+if pytorch large thing needs to be installed maybe you can just copy venv around instead of many downloads on both accounts.
