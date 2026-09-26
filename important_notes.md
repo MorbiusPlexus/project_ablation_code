@@ -77,9 +77,63 @@ This protects both the tokens that need rebuilding (H1) and the integration step
 - If run 3 ≈ run 2, location isn't the lever; look at cut depth or destination instead.
 - Don't finalise the variant until run 3 reports.
 
+## 5a. DECISION POINT: run 3 vs run 2 (recorded 2026-09-27)
+
+**When:** run 3 (`w1_mem_cut_far`, job 2717537) starts on gnode078 after run 1 finishes (~27 Sep 21:30). Its first comparable evals follow; the final call is at matched steps (1000 / 2000 / final 3815).
+
+**What is compared:** val loss at matched steps.
+- run 3 − run 1: cut 4 layers later (6–9, 16–19)
+- run 2 − run 1: cut right after injection (2–5, 12–15)
+
+Both are on the 2080 Ti with identical recipes, so only the cut location differs.
+
+**Rule:**
+
+| outcome | meaning | action |
+|---|---|---|
+| run 3's penalty clearly smaller than run 2's (difference well above ~0.01–0.02 run-to-run noise) | location matters | wave 2 includes the user's architecture (below) as the main candidate |
+| run 3 ≈ run 2 | location isn't the lever | wave 2 moves to cut depth (Δ=640 / spread cut) or destination (freed → table) instead |
+| run 3's penalty larger than run 2's | layers right after injection are the *cheaper* place to cut, so the near-cut hypothesis is supported | tune the near cut (depth/profile) rather than move it |
+
+**Also read before deciding:** the Sink-mass bucketed loss gap (§4) and the run 5 − run 4 gap once it has stabilised (§1).
+
+## 5b. User's proposed architecture: "two fat FFNs after injection, then cut" (recorded 2026-09-27)
+
+**Idea:** after each memory insertion, keep the next two FFNs at full width, as a safety net for tokens whose lookup failed (H1) and to integrate the memory output (H2). Then cut the FFN in the following three layers.
+
+**Layer map** (24 layers, 0-indexed, memory at 1 and 11):
+
+| layers | FFN |
+|---|---|
+| 0–1 | full (1 carries memory) |
+| 2–3 | **full**: the two fat FFNs after injection 1 |
+| 4–6 | **cut** |
+| 7–11 | full (11 carries memory) |
+| 12–13 | **full**: the two fat FFNs after injection 2 |
+| 14–16 | **cut** |
+| 17–23 | full |
+
+**Parameter matching:** same total cut as wave 1 (31,457,280) with the same destination (attention widening to 24 q / 4 kv heads), so it stays iso-parameter with runs 1–5.
+- **3 layers per block (as proposed):** 6 cut layers, so Δ ≈ 1707. Rounded to a multiple of 32: **Δ = 1696**, d_ff 2816 → **1120** (60% cut per layer). The mismatch is −196,608 parameters (−0.05% of total), well inside the 0.5% tolerance.
+- **Caveat:** 60% per layer is much deeper than wave 1's 45%. If §3.4 (narrowing losses are convex in depth) holds, this could cost more than the location saves.
+- **Alternative at wave-1 depth:** 4 layers per block, cut 4–7 and 14–17 with Δ = 1280 (d_ff 1536). Exact parameter match. This isolates "location" from "depth" relative to run 2.
+
+**Config sketch** (not created yet; add in wave 2):
+```yaml
+# configs/w2_mem_fat2_cut3.yaml
+extends: w1_mem_full.yaml
+name: w2_mem_fat2_cut3
+params: {reference: false}
+model:
+  n_heads: 24
+  n_kv_heads: 4
+  ffn_cut: {layers: [4, 5, 6, 14, 15, 16], delta: 1696}
+```
+Its dense twin (same cut on the 4256 base, no memory) is needed to read the cut × memory interaction, as with runs 4 and 5.
+
 ## 6. Wave-2 candidates (pick after wave 1)
 
-- The two-fat-then-cut variant above (§5).
+- The two-fat-then-cut architecture (§5b), gated by the run 3 decision point (§5a).
 - **Milder cut:** Δ = 640 in the same layers (sensitivity), or spread over more layers.
 - **Table destination:** same cut, freed parameters to the memory table (R ≈ 118). This is `notes_and_updates` run 7.
 - **Cut without widening:** diagnostic, not iso-parameter. Separates the cut effect from the destination effect.
