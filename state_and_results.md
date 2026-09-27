@@ -2,20 +2,23 @@
 
 Current job state, measured numbers and diagnostics. Things to look at later are in `important_notes.md`. The job log is in `cluster_jobs.md`.
 
-## Job state (2026-09-27 14:06 IST)
+## Job state (2026-09-27 22:41 IST)
 
-| run | config | job | node | GPUs | state | ETA |
-|---|---|---|---|---|---|---|
-| 1 | w1_mem_full | 2717512 | gnode078 | 4× 2080 Ti | step 2600 / 3815 | ~27 Sep 21:50 |
-| 2 | w1_mem_cut_near | 2717520 | gnode082 | 4× 2080 Ti | step 2250 | ~28 Sep 01:00 |
-| 4 | w1_dense_full | 2717513 | gnode118 | 4× 3090 | **finished** 27 Sep 10:29, final val 2.802 | done |
-| 5 | w1_dense_cut_near | 2717521 | gnode114 | 2× 3090 | step 2260 | ~28 Sep 02:00 |
-| 3 | w1_mem_cut_far | 2717537 | gnode078 | 4× 2080 Ti | queued (afterok run 1) | ~29 Sep 00:00 |
-| A | w2_mem_rank1 (idea A) | 2719140 | gnode115 | 2× 3090 | running (started 19:44) | ~29 Sep 01:00 |
-| probe | memory zero-out | 2718727 | gnode118 | 4× 3090 | done 27 Sep ~15:10, job cancelled | – |
+| run | config | job | node | GPUs | state | ETA | wandb run |
+|---|---|---|---|---|---|---|---|
+| 1 | w1_mem_full | 2717512 | gnode078 | 4× 2080 Ti | **finished** 27 Sep 22:28, final val **2.805** | done | `w1_mem_full-4c044a60` |
+| 2 | w1_mem_cut_near | 2717520 | gnode082 | 4× 2080 Ti | step 3360 / 3815 | ~28 Sep 01:30 | `w1_mem_cut_near-66a228d6` |
+| 3 | w1_mem_cut_far | 2717537 | gnode078 | 4× 2080 Ti | running since 27 Sep 22:28 (step 20) | ~29 Sep 00:00 | `w1_mem_cut_far-0846dc74` |
+| 4 | w1_dense_full | 2717513 | gnode118 | 4× 3090 | **finished** 27 Sep 10:29, final val **2.802** | done | `w1_dense_full-143ce477` |
+| 5 | w1_dense_cut_near | 2717521 | gnode114 | 2× 3090 | step 3370 / 3815 | ~28 Sep 02:00 | `w1_dense_cut_near-caf53436` |
+| A | w2_mem_rank1 (idea A) | 2719140 | gnode115 | 2× 3090 | step 370 / 3815 | ~29 Sep 01:00 | `w2_mem_rank1-150f542d` |
+| probe | memory zero-out | 2718727 | gnode118 | 4× 3090 | done 27 Sep ~15:10, job cancelled | – | – |
 
-- No crashes, NaNs or OOMs.
-- The fp16 scale has grown to 131072 in every run.
+- wandb project: https://wandb.ai/ad1tya2-iiit-hyderabad/morbius-wave1. `w1_mem_full-3a5981e5` there is the 4-step smoke test.
+- No crashes, NaNs or OOMs in any training run. The fp16 scale has grown to 131072 in every wave-1 run.
+- **Final checkpoints stay on node ssd until everything is done.** Then copy them back to home (`important_notes.md` §9).
+  - run 1: `gnode078:/ssd_scratch/aditya.shankar/morbius/runs/w1_mem_full/checkpoints/step_0003815.pt`
+  - run 4: `gnode118:/ssd_scratch/sparsh.bhartia/morbius/runs/w1_dense_full/checkpoints/step_0003815.pt`
 
 ## Val loss (fixed 20M-token held-out slice)
 
@@ -32,10 +35,14 @@ Current job state, measured numbers and diagnostics. Things to look at later are
 | 1800 | 944M | 3.005 | 2.990 | 3.008 | 2.981 |
 | 2000 | 1.05B | 2.970 | 2.954 | 2.970 | 2.944 |
 | 2200 | 1.15B | 2.938 | 2.923 | 2.938 | 2.911 |
-| 2400 | 1.26B | 2.911 | | 2.910 | |
-| 2600 | 1.36B | 2.886 | | 2.885 | |
-| 3000 | 1.57B | | | 2.845 | |
-| 3815 | 2.00B | | | **2.802** | |
+| 2400 | 1.26B | 2.911 | 2.895 | 2.910 | 2.882 |
+| 2600 | 1.36B | 2.886 | 2.871 | 2.885 | 2.857 |
+| 2800 | 1.47B | 2.865 | 2.850 | 2.864 | 2.836 |
+| 3000 | 1.57B | 2.847 | 2.833 | 2.845 | 2.818 |
+| 3200 | 1.68B | 2.833 | 2.818 | 2.830 | 2.802 |
+| 3400 | 1.78B | 2.821 | | 2.818 | |
+| 3600 | 1.89B | 2.812 | | 2.809 | |
+| 3815 | 2.00B | **2.805** | | **2.802** | |
 
 **Differences at matched steps** (negative means the cut or memory helps):
 
@@ -45,11 +52,13 @@ Current job state, measured numbers and diagnostics. Things to look at later are
 | 1000 | −0.012 | −0.021 | −0.010 | −0.001 |
 | 2000 | −0.016 | −0.026 | 0.000 | +0.010 |
 | 2200 | −0.015 | −0.027 | 0.000 | +0.012 |
+| 3200 | −0.015 | −0.028 | +0.003 | +0.016 |
+| 3815 (final) | | | **+0.003** | |
 
-**Reading (step 2200, ~1.15B tokens):**
-- **The cut plus attention widening helps**, with or without memory. It helps more without memory (−0.027 vs −0.015).
-- **Memory adds nothing over dense at equal parameters.** In the cut configuration it is slightly worse (+0.012).
-- **The cut × memory interaction** is +0.012 against the hypothesis. It is small and single-seed.
+**Reading (step 3200, ~1.68B tokens; final for runs 1 and 4):**
+- **The cut plus attention widening helps**, with or without memory. It helps more without memory (−0.028 vs −0.015), and both gaps have been stable since step ~2000.
+- **Memory adds nothing over dense at equal total parameters.** The final values are 2.805 vs 2.802. In the cut configuration memory is slightly worse (+0.016). It does use 27% fewer active parameters per token (see the probe).
+- **The cut × memory interaction** is +0.013 at step 3200, against the hypothesis. It is small and single-seed.
 
 ## Memory diagnostics
 
@@ -63,6 +72,7 @@ Values at each eval. "Sink" is the mass given to the zero-value "nothing useful"
 | 1800 | 0.460 | 0.450 | 14.9 / 14.6 | 0.0013 | 0.416 | 0.445 | 15.0 / 14.2 |
 | 2200 | 0.463 | 0.451 | 14.9 / 14.6 | 0.0013 | 0.418 | 0.445 | 15.0 / 14.2 |
 | 2600 | 0.464 | 0.450 | 14.8 / 14.6 | 0.0012 | | | |
+| 3815 | 0.470 | 0.451 | 14.8 / – | – | | | |
 
 - Sink mass drifts back toward 0.5 after step 400, and routing codes stay near uniform (~15 of 16; the paper reports ~8).
 - **These two diagnostics do not mean the memory is unused.** The zero-out probe below shows the models depend on it heavily. Sink mass near 0.5 and near-uniform codes are compatible with a large memory contribution.
@@ -123,5 +133,18 @@ Data: `gnode118:/ssd_scratch/sparsh.bhartia/morbius/probe/` holds `probe_results
 - If it is clearly better, a later ablation separates "rank-1 added" from "layer 11 halved".
 
 **New eval diagnostics:** `mem1/rank1_out_to_residual`, `mem1/v2_out_to_residual`.
+
+**Progress**
+
+| step | val loss | run 1 at same step (2080 Ti) | run 4 at same step (3090) | rank-1 out / residual | v2 out / residual (layer 1) |
+|---|---|---|---|---|---|
+| 200 | 4.866 | 4.888 | 4.906 | 0.058 | 0.279 |
+
+The rank-1 path is in use from early on (6% of the residual norm, vs 28% for v2). The early lead is −0.022 vs run 1, but early numbers are noisy and cross GPU type.
+
+**Launch notes**
+- The first attempt (job 2719088) landed on gnode113, which exposes only 1 of its 2 allocated GPUs (`invalid device ordinal`). It was cancelled and gnode113 excluded.
+- Env and data were staged from gnode114 (Sparsh's run 5 node).
+- **Open decision:** a matched-GPU baseline (run 1 config on 2× 3090, e.g. gnode116) would remove the GPU-type confound and give a first noise estimate. It has not been launched.
 
 Same codebase as wave 1 (`~/morbius`); the variant is just `configs/w2_mem_rank1.yaml`.

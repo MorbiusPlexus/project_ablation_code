@@ -1,6 +1,6 @@
 # Wave 1 build report
 
-Status as of 2026-09-26 (IST). This covers what was built, the decisions taken, what was tested, what was measured, and what is still open. The spec is `wave1_plan.md` (then `notes_and_updates.md`, then the proposal). The cluster job log is `cluster_jobs.md`.
+Built 2026-09-26; updated 2026-09-27 22:41 IST. This covers what was built, the decisions taken, what was tested, what was measured, and what is still open. Live results: `state_and_results.md`. Items for later: `important_notes.md`. The spec is `wave1_plan.md` (then `notes_and_updates.md`, then the proposal). The cluster job log is `cluster_jobs.md`.
 
 ## 1. What was built
 
@@ -16,7 +16,9 @@ Status as of 2026-09-26 (IST). This covers what was built, the decisions taken, 
 | `ffnmem/fitcheck.py` | Memory-fit gate: peak memory and step time of the real training step, one isolated launch per combination. OOM is recorded as a result. |
 | `ffnmem/distlaunch.py` | Local multi-rank launcher. On Windows, torch 2.11's torchrun agent ignores `USE_LIBUV=0`, so ranks are spawned directly. The cluster uses torchrun. |
 | `configs/` | `base.yaml`, the 5 wave-1 runs, `local_gpu_sanity{,_cut,_dense}`, `tiny_cpu`. |
-| `slurm/stage.sh`, `train_job.sh`, `fitcheck_all.sh`, `README.md` | Plain cluster scripts. The earlier YAML/Jinja launcher was removed at the user's request. |
+| `slurm/stage.sh`, `train_job.sh`, `fitcheck_all.sh`, `run_probe.sh`, `analyze_dump.py`, `README.md` | Plain cluster scripts. The earlier YAML/Jinja launcher was removed at the user's request. |
+| `ffnmem/probe_memory.py` | Memory zero-out probe and per-token loss/Sink dumps on a checkpoint (standalone). |
+| `ffnmem/memory/wrapper.py` `rank1`, `memory_overrides` | Wave-2 options: a per-entry rank-1 readout added to v2 (idea A), and per-memory-layer config overrides. Additive; absent means unchanged behaviour. |
 | `tests/` | 36 CPU tests, 2 GPU tests, 1 optional flash test, 3 multi-process tests. |
 
 ## 2. Data findings (the user's tokenization code)
@@ -173,21 +175,76 @@ Config S fits at seq 2048 on both GPU types, so no mitigation (shorter sequences
 
 ## 8. Cluster status and open items
 
-Launched 2026-09-26 ~20:33–20:41 IST. See `cluster_jobs.md` for job ids, nodes and ETAs.
+Launched 2026-09-26 ~20:33–20:41 IST. The **live** job state, all loss curves, diagnostics and probe results are in `state_and_results.md`. Job ids and nodes are in `cluster_jobs.md`. Things to look at later are in `important_notes.md`.
 
-| run | job | node | status |
-|---|---|---|---|
-| 1 `w1_mem_full` | 2717512 | gnode078, 4× 2080 Ti | running |
-| 2 `w1_mem_cut_near` | 2717520 | gnode082, 4× 2080 Ti | running |
-| 3 `w1_mem_cut_far` | 2717537 | gnode078, starts after run 1 succeeds | queued |
-| 4 `w1_dense_full` | 2717513 | gnode118, 4× 3090 | running |
-| 5 `w1_dense_cut_near` | 2717521 | gnode114, 2× 3090 | running |
+**At the time of writing (2026-09-27 22:41):**
+- Runs 1 and 4 are finished: final val 2.805 (memory) vs 2.802 (dense).
+- Runs 2 and 5 finish overnight; run 3 is running; wave-2 idea A is running.
 
-- wandb project: https://wandb.ai/ad1tya2-iiit-hyderabad/morbius-wave1
-- The first eval, and the first post-init Sink-mass reading, comes at step 200: ~1.3 h in on 2080 Ti, ~40 min on 3090.
-- Checkpoints are on node-local ssd. Resuming needs the same node; if a node dies, that run restarts from scratch unless a checkpoint was copied off. At the end, copy the final checkpoints to home by hand.
+**Operational notes**
+- **Checkpoints and resume.** Checkpoints are on node-local ssd, so resuming needs the same node (re-submit with `-w <node>`). If a node dies, that run restarts from scratch unless a checkpoint was copied off. Final checkpoints are copied to home by hand at the end (`important_notes.md` §9).
+- **Environment.** The auto-mode classifier refused to make `/home2/sparsh.bhartia` traversable. The aim was to share Sparsh's existing miniconda (torch 2.6) with Aditya's jobs. Instead, one standalone env (CPython 3.12, torch 2.11 cu128) was built on gnode066 and copied to training nodes. Its files are world-readable by default, so no permission changes were needed.
+- **Faulty nodes.** gnode066 GPU0 reports "Unknown Error", so that node is the data and env source only. gnode113 (plafnet2) exposes only 1 of 2 allocated GPUs; exclude it.
+- **wandb credentials.** Aditya's `api.wandb.ai` entry was copied into Sparsh's `~/.netrc` at the user's request (backup `~/.netrc.bak_morbius`). Both accounts log to the same wandb account.
+- **git hash.** Code is in git (GitHub `MorbiusPlexus/project_ablation_code`). The cluster copies in `~/morbius` are not git checkouts, so checkpoints record `git: unknown`. The deployed code corresponds to commit `29d6c7f` and later; everything since is additive.
+- **One codebase.** `~/morbius` on both accounts is the same commit; wave-2 variants are configs. `~/morbius_w2` (Sparsh) is only a symlink, kept because job 2719140 was launched from that path.
+- **Secrets in git.** `.env` (HF token) and `slurm details.txt` were committed at the user's request. Rotate the HF token if the repo is or becomes public.
 
-- The auto-mode classifier refused to make `/home2/sparsh.bhartia` traversable. The aim was to share Sparsh's existing miniconda (torch 2.6) with Aditya's jobs. Instead, one standalone env (CPython 3.12, torch 2.11 cu128) was built on gnode066 and copied to training nodes. Its files are world-readable by default, so no permission changes were needed.
-- gnode066 GPU0 reports "Unknown Error", so that node serves as the data and env source only.
-- wandb credentials: Aditya's `api.wandb.ai` entry was copied into Sparsh's `~/.netrc` at the user's request. The backup is `~/.netrc.bak_morbius`.
-- The repo has no git commit yet, so checkpoints record `git: unknown`. Make a first commit before the runs if a hash is wanted.
+## 9. Verification against the papers and reference code (2026-09-27)
+
+A check against the Lngram v2 paper (arXiv 2609.03426: §2.2–2.5, App. A.3–A.4, D.3, E / Table 13), the official Lngram code and llama2.c.
+
+**Matches**
+- **Vendored module:** `lngram_v2.py` is byte-identical to the official `Lngram_v2.py`.
+- **Router:** `RMSNorm(H) · W_q`, no bias or scaling, hard sign bits (§2.2). It reuses the layer's pre-attention norm, as the v1 code does. Keeping it in fp32 is our addition.
+- **Injection:** `Y = Ṽ + SiLU(DWConv(Norm(Ṽ)))` and `H ← H + Y` before attention, with no extra gate (§2.4).
+- **Initialisation** (Table 13): table normal with std scale 1.0, output projection zero, conv k=4 / dilation 3 / zero-init, Sink mass 0.5, approximate surrogate. The code defaults are the reverse; our override is correct.
+- **Optimiser:** tables at 4× LR, tables and router with weight decay 0.
+- **Readout config:** 2- and 3-grams, 4 bits, 16 × 64 = 1024 query dims. Insertion at 0-indexed layers 1 and 11 (the paper's "2nd and 12th").
+- **Surrogate:** training-only, code-default temperature and scale.
+- **Backbone vs llama2.c:** interleaved-pair RoPE, RMSNorm, pre-norm block and SwiGLU are identical.
+
+**Differences**
+- **Document-boundary masking is off.** The paper masks n-grams across packed documents; ours don't, per `wave1_plan.md`. This is the only real deviation. It is consistent across runs.
+- **LR schedule:** the paper floors at ~2% of peak after 1,000 warmup steps (a Keye fine-tune recipe). We use a 10% floor and a 2% warmup (minimum 100 steps), per the plan.
+- **Precision:** bf16 in the paper; fp16 here, which the 2080 Ti needs.
+- **Scaled init:** llama2.c applies the scaled init 0.02/√(2L) to `w3` and `wo`; we apply it to `w2` (the actual FFN output projection) and `wo`.
+
+## 10. Incident log (what went wrong, and the fix)
+
+| when | what | fix |
+|---|---|---|
+| 26 Sep, local | torch 2.11's `torchrun` on Windows ignores `USE_LIBUV=0` | `ffnmem/distlaunch.py` spawns ranks directly on Windows; the cluster uses torchrun |
+| 26 Sep, local | download script crashed on Windows cp1252 (`→` in a print) and at the final tqdm print | ran with `PYTHONUTF8=1`; data complete, `meta.json` says `complete: false` |
+| 26 Sep, local | Claude Code's low-memory reaper killed the local GPU sanity run at step ~100 | results up to step 100 recorded (§6); not re-run |
+| 26 Sep, cluster | gnode066 GPU0 "Unknown Error" | gnode066 used only as the data/env source |
+| 26 Sep, cluster | uv PyPI download stalled; the wandb wheel blocked the whole package batch | installed without wandb first, then wandb separately |
+| 26 Sep, cluster | `pkill -f` patterns matched and killed their own command line | anchored patterns to the binary path |
+| 26 Sep, cluster | wandb 0.30 removed `wandb.util.generate_id` | uuid-based run id, stored in the run dir so resumes continue the same wandb run |
+| 26 Sep, cluster | **GPU-only resume bug:** fused CUDA AdamW rejects the CPU `step` tensors left by ZeRO-1 `load_state_dict` | `optimizer_state_to_param_device()` after load, plus `empty_cache()`; GPU resume test added |
+| 26 Sep, local | every text file in the repo (including the vendored module and the user's scripts) was silently converted to CRLF by something outside our edits; `sbatch` rejected the job script | converted back to LF; vendored file re-verified by git blob hash |
+| 27 Sep, cluster | gnode113 exposes only 1 of 2 allocated GPUs (`invalid device ordinal`) | job cancelled, gnode113 excluded |
+| 27 Sep, cluster | a separate wave-2 code copy (`~/morbius_w2`) was an unnecessary split | unified into `~/morbius`; `~/morbius_w2` is a symlink |
+
+## 11. How the Lngram v2 readout works, and the rank-1 idea (design notes)
+
+**Readout at a memory layer, for token t**
+
+1. **Routing.** `z = W_q · RMSNorm(h_t)` gives R × 4 logits (R = 90). Signs become 4 bits, i.e. one of 16 codes per route.
+2. **Lookup.** The codes of the last 2 (3) tokens address a 2-gram (3-gram) table: 256 (4096) rows per route, each a 128-dim vector. The two are concatenated into a 256-dim route token m_r. The address is hard; the router learns only through the counterfactual one-bit-flip surrogate.
+3. **Gating = attention over the R routes, not over time.**
+   - The query is `W_Q · norm(h_t)`: 16 heads × 64.
+   - Keys and values come from one **shared** projection, `W_KV · norm(m_r)`: 4 KV heads.
+   - Each head takes a softmax over the routes plus a **Sink**: a fixed zero-value slot with logit log(R(1−μ₀)/μ₀), μ₀ = 0.5. Mass on the Sink means "nothing useful retrieved", so the Sink is the off switch.
+4. **Output.** An output projection (zero-initialised) gives Ṽ. Then Ṽ + SiLU(causal depthwise conv(norm Ṽ)) is added to the residual before attention.
+
+**Why rank-1 might help**
+- In v2 an entry's key and value are both linear functions of the same stored vector, through the shared W_KV. So "what it matches" and "what it writes" are coupled.
+- A per-entry rank-1 map (u_i, w_i, applied to h) decouples them and makes each entry a tiny transform of h rather than a fixed vector.
+
+**Why add it rather than replace v2**
+- Adding it to v2 keeps W_KV as a well-trained shared decoder.
+- Replacing v2 at equal bytes would drop from 4 KV heads to 1.
+- A rank-k version is a k-unit mini-FFN per entry.
+
+The ideas (A: rank-1 add-on; B: shared low-rank per group plus per-entry rank-1) are in `important_notes.md` §5c. Idea A as implemented is in `state_and_results.md` (wave 2).

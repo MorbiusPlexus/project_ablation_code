@@ -137,6 +137,21 @@ Keep the Lngram v2 readout unchanged: shared W_KV, GQA over routes, Sink, conv.
 
 **Nonlinearity φ:** SiLU on w_iᵀ h, or none. UltraMemV2 found no activation acceptable. With g_i from the softmax, the extra term is already gated, so φ is optional.
 
+### Idea A as implemented: `w2_mem_rank1`, launched 27 Sep 19:44 (job 2719140, gnode115)
+
+Results are in `state_and_results.md` (wave 2). **How it differs from the idea as written above:**
+
+1. **Gate.** The rank-1 term is gated by its own SiLU(w_i · P_in h), not by the v2 route weights g_i. That was simpler and avoids recomputing v2's scores. The "gate by v2 softmax" variant is untested.
+2. **Where the rank-1 map acts.** It acts in a 32-dim space: `P_in: 1024→32` is shared, then per entry w, u ∈ ℝ³², then a shared `U_out: 32→1024` (zero-init). Output = U_out · Σ u · SiLU(w · P_in h) / √(R·orders).
+3. **Only at layer 1.** It is paid for by halving layer 11's v2 table (dm 128→64). The probe showed layer 11 is worth +0.02 nats vs +0.21 for layer 1, which was the user's suggestion.
+4. **No router gradient.** The rank-1 lookups send no gradient to the router (hard lookup); the router still trains through the v2 surrogate.
+5. **Recipe.** The rank-1 tables use the table recipe: 4× LR, wd 0.
+
+**If it is clearly better than run 1, ablations for attribution:**
+- **(a)** layer 11 halved without rank-1 (is the budget move alone responsible?)
+- **(b)** rank-1 added with layer 11 untouched (extra parameters, labelled)
+- **(c)** a run 1 baseline on 2× 3090 to remove the GPU-type confound. This can be launched now: see §8.
+
 ### Idea B: shared low-rank matrix per group of nearby entries, combined with a per-entry rank-1 matrix
 
 **Structure:**
@@ -186,6 +201,8 @@ Each needs an equal-bytes or clearly labelled extra-parameter comparison against
 
 **Logistics**
 - Checkpoints are node-local:
+  - idea A: gnode115, sparsh
+  - memory-probe files (model-only step-2000 of runs 1 and 2, per-token dumps): gnode118, sparsh
   - run 1: gnode078, aditya
   - run 2: gnode082, sparsh
   - run 3: gnode078, aditya
@@ -194,6 +211,47 @@ Each needs an equal-bytes or clearly labelled extra-parameter comparison against
 - Comparing across runs needs a small staging job to bring checkpoints onto one GPU node. The first realistic window is gnode118 after run 4 finishes.
 - Checkpoints to compare: steps 1000, 2000, 3000 (kept by retention) and the final one (3815).
 
-## 8. Standing decision
+## 8. Standing decision and open choices (updated 2026-09-27 22:41)
 
-No changes to running jobs (runs 1, 2, 4, 5 running; run 3 queued). All of the above is for after wave 1.
+**Standing decision:** don't change running jobs.
+- Running: runs 2, 3, 5 and idea A.
+- Finished: runs 1 and 4.
+
+**Open choices for the user**
+- **Matched baseline for idea A.** Run 1's config on 2× 3090 (gnode116 is idle) removes the GPU-type confound and gives a first run-to-run noise estimate. Not launched.
+- **Replicate run 5** (spike). Lower priority now that run 5 recovered fully.
+- **Document-boundary masking** (the paper's choice; off in all our runs). A later run could test it; switching now would break comparability.
+- **Wave-2 cut design.** Waits for run 3 (§5a) and the per-layer importance profile (§7).
+
+## 9. End-of-runs checklist
+
+**1. Copy final checkpoints to home NFS.** This was the user's instruction: only at the end.
+- The home quota is ~30 GB per account; ~19 GB is already used on each.
+- A full checkpoint (model + optimizer, resumable) is 4.8 GB. A model-only file is 1.6 GB.
+- Sparsh holds 4 runs (2, 4, 5, A), so full checkpoints (~19 GB) do not fit. Options:
+  - **(a)** model-only files in home, with full checkpoints kept on ssd
+  - **(b)** full checkpoints for the key runs only
+  - **(c)** find another store
+
+  **Ask before copying.**
+- Final checkpoint paths: `<node>:/ssd_scratch/<user>/morbius/runs/<config>/checkpoints/step_0003815.pt`
+  - run 1: gnode078 (aditya)
+  - run 2: gnode082
+  - run 3: gnode078 (aditya)
+  - run 4: gnode118
+  - run 5: gnode114
+  - idea A: gnode115
+
+  All nodes are Sparsh's unless marked. Reading a node's ssd needs a job of that user on that node.
+- **Run 4's node gnode118 is now used by someone else.** Copying its checkpoint needs a Sparsh job there again (plafnet2).
+
+**2. Update the docs.**
+- `state_and_results.md`: final numbers for all runs.
+- `REPORT.md`: status.
+- `cluster_jobs.md`: final job states.
+
+**3. Clean up.**
+- Probe files on gnode118 (~3.2 GB): keep until the analyses are done.
+- Holder jobs: none left.
+
+**4. Run the post-hoc analyses (§7)** on the saved checkpoints.
