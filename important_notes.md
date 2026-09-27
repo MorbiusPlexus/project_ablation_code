@@ -225,7 +225,15 @@ Each needs an equal-bytes or clearly labelled extra-parameter comparison against
 
 ## 9. End-of-runs checklist
 
-**1. Copy final checkpoints to home NFS.** This was the user's instruction: only at the end.
+**1. Final checkpoints to home NFS: DECIDED and automated (2026-09-28).**
+- **Decision (user):** there is no value in resuming these runs later, because the cosine schedule has ended and the loss has plateaued. Home gets the final **fp32 model weights + config + step only** (no optimizer state), uncompressed, ~1.5 GiB per run.
+  - Measured: lossless compression saves only 7–10% (14–18% with byte shuffle), because 3 of every 4 fp32 bytes are random mantissa bits. So it isn't used.
+- **Tool:** `slurm/save_final.sh <cfg>`. A tiny CPU job pinned to the run's node saves `~/morbius/final_ckpts/<cfg>_step3815.pt`; jobs are queued with `afterok` on each run.
+- **Done:** run 1 (verified tensor-identical to the source) and run 4.
+- **Queued:** runs 2, 3, 5 and A (see `cluster_jobs.md`).
+- **Full resumable checkpoints** stay on node ssd for now. They can be deleted once the post-hoc analyses no longer need them (the kept steps 1000/2000/3000 are useful for §7).
+
+**Old notes (kept for context):** the original instruction was to copy only at the end.
 - The home quota is ~30 GB per account; ~19 GB is already used on each.
 - A full checkpoint (model + optimizer, resumable) is 4.8 GB. A model-only file is 1.6 GB.
 - Sparsh holds 4 runs (2, 4, 5, A), so full checkpoints (~19 GB) do not fit. Options:

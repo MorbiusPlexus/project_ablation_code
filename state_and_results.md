@@ -16,9 +16,10 @@ Current job state, measured numbers and diagnostics. Things to look at later are
 
 - wandb project: https://wandb.ai/ad1tya2-iiit-hyderabad/morbius-wave1. `w1_mem_full-3a5981e5` there is the 4-step smoke test.
 - No crashes, NaNs or OOMs in any training run. The fp16 scale has grown to 131072 in every wave-1 run.
-- **Final checkpoints stay on node ssd until everything is done.** Then copy them back to home (`important_notes.md` §9).
-  - run 1: `gnode078:/ssd_scratch/aditya.shankar/morbius/runs/w1_mem_full/checkpoints/step_0003815.pt`
-  - run 4: `gnode118:/ssd_scratch/sparsh.bhartia/morbius/runs/w1_dense_full/checkpoints/step_0003815.pt`
+- **Final weights are saved to home** as `~/morbius/final_ckpts/<cfg>_step3815.pt`: fp32 model + config, no optimizer (resuming has no value after the schedule ends).
+  - Done: run 1 (aditya) and run 4 (sparsh).
+  - Runs 2, 3, 5 and A are saved automatically when they finish.
+  - Full resumable checkpoints stay on node ssd.
 
 ## Val loss (fixed 20M-token held-out slice)
 
