@@ -1,12 +1,12 @@
 #!/bin/bash
-# One wave-1 run on one node (4 GPUs; set NPROC=2 via --export=ALL,NPROC=2 for a 2-GPU node).
+# One training run (any config) on one node (4 GPUs; set NPROC=2 via --export=ALL,NPROC=2 for a 2-GPU node).
 #   sbatch -A research -p u22 --constraint=2080ti --gres=gpu:4 -c 16 --mem=48G -t 4-00:00:00 \
 #          -J w1_mem_full -o ~/morbius/joblogs/%x-%j.out --signal=B:USR1@600 \
 #          ~/morbius/slurm/train_job.sh w1_mem_full [extra train.py args, e.g. --set train.ckpt_every=400]
 # Checkpoints live on this node's /ssd_scratch; to resume, re-submit with -w <same node>.
 set -uo pipefail
 CFG=$1; shift
-cd "${MORBIUS_DIR:-$HOME/morbius}"   # code dir; wave-2 variants use a separate copy (--export=ALL,MORBIUS_DIR=...)
+cd "${MORBIUS_DIR:-$HOME/morbius}"   # code dir (one codebase; variants are configs)
 eval "$(bash slurm/stage.sh | grep -E '^(ENV_PY|DATA_DIR)=')"
 [ -n "${ENV_PY:-}" ] && [ -n "${DATA_DIR:-}" ] || { echo "staging failed: is a holder job of $USER running on gnode066?"; exit 1; }
 OUT=/ssd_scratch/$USER/morbius/runs/$CFG

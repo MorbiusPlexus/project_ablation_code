@@ -124,4 +124,4 @@ Data: `gnode118:/ssd_scratch/sparsh.bhartia/morbius/probe/` holds `probe_results
 
 **New eval diagnostics:** `mem1/rank1_out_to_residual`, `mem1/v2_out_to_residual`.
 
-Code is in `~/morbius_w2` (commit with `configs/w2_mem_rank1.yaml`).
+Same codebase as wave 1 (`~/morbius`); the variant is just `configs/w2_mem_rank1.yaml`.
