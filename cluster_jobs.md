@@ -25,7 +25,7 @@ Every job launched for this project, which account, partition and node, and why.
 |---|---|---|---|---|
 | 1 | w1_mem_full | aditya / u22 gnode078 | 2080 Ti | running (2717512) |
 | 2 | w1_mem_cut_near | sparsh / u22 gnode082 | 2080 Ti | running (2717520) |
-| 4 | w1_dense_full | sparsh / plafnet2 gnode118 | 3090 | running (2717513) |
+| 4 | w1_dense_full | sparsh / plafnet2 gnode118 | 3090 | **finished** 27 Sep 10:29 (final val 2.802) |
 | 3 | w1_mem_cut_far | aditya / u22 gnode078 | 2080 Ti | queued (2717537, after run 1) |
 | 5 | w1_dense_cut_near | sparsh / plafnet2 gnode114 (2x3090) | 3090 | running (2717521) |
 
@@ -40,10 +40,11 @@ Times are cluster clock (IST).
 | 2026-09-26 19:20 | 2717435 | aditya | u22 | gnode078 | morbius_fit2080 | 4x2080Ti holder: stage env+data, 2080 Ti fitcheck, real-path smoke + resume test | cancelled 20:33 (handed node to 2717512) |
 | 2026-09-26 19:20 | 2717436 | sparsh | plafnet2 | gnode118 | morbius_fit3090 | 4x3090 holder: stage env+data, 3090 fitcheck | cancelled 20:33 (handed node to 2717513) |
 | 2026-09-26 20:33 | 2717512 | aditya | u22 | gnode078 | w1_mem_full | **run 1**; 4x2080Ti, zero1, micro_batch 2, ckpt every 500 | running |
-| 2026-09-26 20:33 | 2717513 | sparsh | plafnet2 | gnode118 | w1_dense_full | **run 4**; 4x3090, micro_batch 4, ckpt every 1000 | running |
+| 2026-09-26 20:33 | 2717513 | sparsh | plafnet2 | gnode118 | w1_dense_full | **run 4**; 4x3090, micro_batch 4, ckpt every 1000 | completed 27 Sep 10:29 |
 | 2026-09-26 20:41 | 2717520 | sparsh | u22 | gnode082 | w1_mem_cut_near | **run 2**; 4x2080Ti, zero1, micro_batch 2, ckpt every 500 | running |
 | 2026-09-26 20:41 | 2717521 | sparsh | plafnet2 | gnode114 | w1_dense_cut_near | **run 5**; 2x3090 (NPROC=2), micro_batch 4, ckpt every 500 | running |
 | 2026-09-26 20:52 | 2717537 | aditya | u22 | gnode078 (pinned) | w1_mem_cut_far | **run 3**; starts after 2717512 succeeds (afterok); env and data already on gnode078, so no gnode066 holder needed | pending (dependency) |
+| 2026-09-27 14:27 | 2718727 | sparsh | plafnet2 | gnode118 | morbius_probe | 4x3090: memory zero-out probe + per-token dumps on run 1/2 step-2000 checkpoints (run 1 file relayed via laptop) | done, cancelled ~15:15 |
 
 Not ours:
 - 2717256 (aditya, interactive on gnode066) was ended by the user.

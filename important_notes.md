@@ -16,33 +16,18 @@ Running observations and open questions. **Decision for now: no changes to any r
 - Run 2 has the same widened attention (24 query heads, 4 KV heads) and did not spike.
 - Assessment: ordinary single-seed warmup instability.
 
-**The damage is washing out.** Train loss gap, run 5 minus run 4:
+**The damage washed out.** By step 1000 run 5 was ahead of run 4 (numbers in `state_and_results.md`).
 
-| step | gap |
-|---|---|
-| 200 | +0.38 |
-| 300 | +0.25 |
-| 400 | +0.15 |
-
-**Decision:** observe. At steps 1000–1500, check whether the run 5 − run 4 gap has flattened.
+**Decision:** observe. Resolved at step 1000: run 5 recovered fully.
 **Option:** after run 4 finishes on gnode118 (~27 Sep 10:30), replicate run 5 there (4× 3090, ~15 h). It won't be bit-exact because the world size differs; that is fine for a second sample.
 
-## 2. Early numbers (val loss on the fixed 20M-token slice)
+## 2. Numbers
 
-| step (tokens) | run 1 mem_full | run 2 mem_cut_near | run 4 dense_full | run 5 dense_cut_near |
-|---|---|---|---|---|
-| 200 (105M) | 4.888 | 4.984 | 4.906 | 5.268 |
-| 400 (210M) | 3.931 | 4.011 | 3.932 | 4.085 |
+All losses, diagnostics and probe results live in `state_and_results.md`. This file is for things to look at later.
 
-- **Cut cost with memory (run 2 − run 1):** +0.096 at step 200 and +0.080 at step 400. This is clean and shrinking slowly.
-- **Cut cost without memory (run 5 − run 4):** +0.153 at step 400, but spike-contaminated.
-- **Interaction (cut × memory): not readable yet.** "Memory halves the cut cost" is exactly the artifact the run-5 spike would produce. Wait until run 5's gap to run 4 is stable.
-- **Memory vs dense at equal params (run 1 vs run 4):** 3.931 vs 3.932, no difference yet. That is expected this early; the Lngram v2 gain was only ~0.03 nats at 1.3B tokens.
-- **Memory diagnostics at step 400:**
-  - Effective codes are 14–15 of 16 in both memory runs. That is near uniform, so routing has not specialised yet; the paper reports ~8 later.
-  - Sink mass at layer 1: run 2 0.39, run 1 0.44. The cut model sends more mass to real routes, so it leans on memory harder. That confirms the memory is compensating, but it does not discriminate between the hypotheses below.
+## 3. Why the cut looked weak early (step ≤ 400)
 
-## 3. Why the cut looks weak so far (and why an early gap is expected)
+> **Update (step 1000+):** the cut runs overtook their uncut baselines, and memory has so far added nothing over dense (see `state_and_results.md`). Keep the points below for the write-up: they explain the early penalty.
 
 1. **Fixed cost vs growing benefit.** The cut removes capacity from step 0. The memory benefit only grows as the tables fill and the addresses settle.
    - At 210M tokens (5% of the run) the codes are near uniform. The tables are being written at moving addresses, which is the unstable-address problem Lngram v2 Appendix B describes for from-scratch training.
