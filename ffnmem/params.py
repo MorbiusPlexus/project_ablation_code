@@ -114,7 +114,9 @@ def describe(cfg: dict) -> dict:
         "d_ff": f"{max(d_ff)}" + (f" / {min(d_ff)} in {m.get('ffn_cut_layers')}" if min(d_ff) != max(d_ff) else ""),
         "attn": f"{m['n_heads']}h/{m['n_kv_heads']}kv",
         "memory": (
-            f"R={m['memory']['routes']} dm={m['memory']['mem_dim']} @ {m['memory_layers']}" if m.get("memory") else "none"
+            f"R={m['memory']['routes']} dm={m['memory']['mem_dim']} @ {m['memory_layers']}"
+            + "".join(f"; @{k}: {v}" for k, v in (m.get("memory_overrides") or {}).items())
+            if m.get("memory") else "none"
         ),
     }
 

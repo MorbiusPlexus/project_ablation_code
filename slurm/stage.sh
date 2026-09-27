@@ -5,9 +5,10 @@
 #   sbatch -A research -p u22 -w gnode066 -c 2 --mem=4G -t 1-00:00:00 -J morbius_hold066 --wrap "sleep 86400"
 set -euo pipefail
 
-SRC_NODE=gnode066
-SRC_ENV=/ssd_scratch/aditya.shankar/morbius/python     # uv standalone CPython 3.12 + torch 2.11 cu128
-SRC_DATA=/ssd_scratch/morbius/climbmix/climbmix         # tokenized ClimbMix (meta.json, val.bin, shards, index)
+# Source of env + data; override with env vars to stage from another node you have a job on.
+SRC_NODE=${SRC_NODE:-gnode066}
+SRC_ENV=${SRC_ENV:-/ssd_scratch/aditya.shankar/morbius/python}   # uv standalone CPython 3.12 + torch 2.11 cu128
+SRC_DATA=${SRC_DATA:-/ssd_scratch/morbius/climbmix/climbmix}     # tokenized ClimbMix (meta.json, val.bin, shards, index)
 B=/ssd_scratch/$USER/morbius
 mkdir -p "$B"
 

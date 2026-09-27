@@ -81,6 +81,11 @@ def resolve_model(model: dict) -> dict:
     for idx in m["memory_layers"]:
         if not 0 <= idx < len(m["layers"]):
             raise ValueError(f"memory layer {idx} outside kept-layer range 0..{len(m['layers']) - 1}")
+    overrides = m.get("memory_overrides") or {}
+    m["memory_overrides"] = {int(k): dict(v) for k, v in overrides.items()} if m["memory"] else {}
+    for pos in m["memory_overrides"]:
+        if pos not in m["memory_layers"]:
+            raise ValueError(f"memory_overrides for position {pos}, which is not a memory layer {m['memory_layers']}")
     m.setdefault("head_dim", 64)
     m.setdefault("norm_eps", 1e-5)
     m.setdefault("rope_theta", 10000.0)

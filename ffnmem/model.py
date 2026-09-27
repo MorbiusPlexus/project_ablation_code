@@ -89,7 +89,7 @@ class FeedForward(nn.Module):
 
 
 class Block(nn.Module):
-    def __init__(self, cfg: dict, layer_id: int, d_ff: int, memory: bool):
+    def __init__(self, cfg: dict, layer_id: int, d_ff: int, memory: dict | None):
         super().__init__()
         self.layer_id = layer_id
         d, eps = cfg["d_model"], cfg["norm_eps"]
@@ -97,13 +97,22 @@ class Block(nn.Module):
         self.attn = Attention(d, cfg["n_heads"], cfg["n_kv_heads"], cfg["head_dim"])
         self.ffn_norm = RMSNorm(d, eps)
         self.ffn = FeedForward(d, d_ff)
-        self.memory = LngramMemory(d, cfg["memory"], cfg["init_std"], eps) if memory else None
+        self.memory = LngramMemory(d, memory, cfg["init_std"], eps) if memory else None
 
     def forward(self, h: Tensor, cos: Tensor, sin: Tensor) -> Tensor:
         if self.memory is not None:
             h = h + self.memory(h, self.attn_norm(h))
         h = h + self.attn(self.attn_norm(h), cos, sin)
         return h + self.ffn(self.ffn_norm(h))
+
+
+def memory_config_for(cfg: dict, pos: int) -> dict:
+    """Shared ``memory`` config, updated by ``memory_overrides[pos]`` (kept-layer position) if given."""
+    mem = dict(cfg["memory"])
+    override = (cfg.get("memory_overrides") or {}).get(pos)
+    if override:
+        mem.update(override)
+    return mem
 
 
 class Transformer(nn.Module):
@@ -114,7 +123,8 @@ class Transformer(nn.Module):
         self.tok_emb = nn.Embedding(cfg["vocab"], d)
         mem_set = set(cfg["memory_layers"])
         self.blocks = nn.ModuleList(
-            Block(cfg, lid, cfg["d_ff"][lid], pos in mem_set) for pos, lid in enumerate(cfg["layers"])
+            Block(cfg, lid, cfg["d_ff"][lid], memory_config_for(cfg, pos) if pos in mem_set else None)
+            for pos, lid in enumerate(cfg["layers"])
         )
         self.norm = RMSNorm(d, cfg["norm_eps"])
         self.output = nn.Linear(d, cfg["vocab"], bias=False)
@@ -169,7 +179,7 @@ COMPONENTS = ("embedding", "attention", "ffn", "norms", "memory_tables", "memory
 def component_of(name: str) -> str:
     if name.startswith("tok_emb.") or name.startswith("output."):
         return "embedding"
-    if ".memory.module.tables." in name:
+    if ".memory.module.tables." in name or ".memory.rank1_tables." in name:
         return "memory_tables"
     if ".memory." in name:
         return "memory_readout"

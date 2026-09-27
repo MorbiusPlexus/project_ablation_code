@@ -6,7 +6,7 @@
 # Checkpoints live on this node's /ssd_scratch; to resume, re-submit with -w <same node>.
 set -uo pipefail
 CFG=$1; shift
-cd ~/morbius
+cd "${MORBIUS_DIR:-$HOME/morbius}"   # code dir; wave-2 variants use a separate copy (--export=ALL,MORBIUS_DIR=...)
 eval "$(bash slurm/stage.sh | grep -E '^(ENV_PY|DATA_DIR)=')"
 [ -n "${ENV_PY:-}" ] && [ -n "${DATA_DIR:-}" ] || { echo "staging failed: is a holder job of $USER running on gnode066?"; exit 1; }
 OUT=/ssd_scratch/$USER/morbius/runs/$CFG

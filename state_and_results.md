@@ -11,6 +11,7 @@ Current job state, measured numbers and diagnostics. Things to look at later are
 | 4 | w1_dense_full | 2717513 | gnode118 | 4× 3090 | **finished** 27 Sep 10:29, final val 2.802 | done |
 | 5 | w1_dense_cut_near | 2717521 | gnode114 | 2× 3090 | step 2260 | ~28 Sep 02:00 |
 | 3 | w1_mem_cut_far | 2717537 | gnode078 | 4× 2080 Ti | queued (afterok run 1) | ~29 Sep 00:00 |
+| A | w2_mem_rank1 (idea A) | 2719140 | gnode115 | 2× 3090 | running (started 19:44) | ~29 Sep 01:00 |
 | probe | memory zero-out | 2718727 | gnode118 | 4× 3090 | done 27 Sep ~15:10, job cancelled | – |
 
 - No crashes, NaNs or OOMs.
@@ -106,3 +107,21 @@ Full 20M-token val slice. The listed memory layers have their output replaced by
 - Bucketing by one model's own loss shows a strong but meaningless pattern (regression to the mean), so it is not used.
 
 Data: `gnode118:/ssd_scratch/sparsh.bhartia/morbius/probe/` holds `probe_results.jsonl`, `dump_run{1,2}/` (per-token loss and Sink) and the model-only step-2000 files. Code: `ffnmem/probe_memory.py`, `slurm/run_probe.sh`, `slurm/analyze_dump.py`.
+
+## Wave 2: idea A (`w2_mem_rank1`), launched 2026-09-27 19:44
+
+**Design** (iso-parameter with run 1: 369,767,808 vs 369,767,936 non-embedding)
+- **Layer 1:** Lngram v2 unchanged (R=90, dm=128), plus a per-entry rank-1 path on the same n-gram addresses.
+  - Each row stores w, u ∈ ℝ³².
+  - Output = U_out · Σ u · SiLU(w · P_in h) / √(R·orders), added to the v2 output.
+  - U_out is zero-initialised, so at init this equals v2.
+  - Rank-1 tables use the table recipe (4× LR, wd 0). They give no router gradient; the router trains through the v2 surrogate.
+- **Layer 11:** v2 with dm=64 (half the table). This pays for the rank-1 tables. Probe: layer 11 is worth +0.02 nats vs +0.21 for layer 1.
+
+**Comparison caveats**
+- The comparison is to run 1, which ran on 2080 Ti with ZeRO-1 at micro-batch 2. This run is on 2× 3090 at micro-batch 4. Same data order and recipe otherwise.
+- If it is clearly better, a later ablation separates "rank-1 added" from "layer 11 halved".
+
+**New eval diagnostics:** `mem1/rank1_out_to_residual`, `mem1/v2_out_to_residual`.
+
+Code is in `~/morbius_w2` (commit with `configs/w2_mem_rank1.yaml`).

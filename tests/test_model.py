@@ -8,7 +8,7 @@ import torch
 
 from ffnmem.attention import attend
 from ffnmem.config import load_config
-from ffnmem.model import Transformer
+from ffnmem.model import Transformer, count_params
 from ffnmem.train import build_optimizer
 
 CFG = Path(__file__).resolve().parents[1] / "configs"
@@ -208,3 +208,71 @@ def test_flash_matches_sdpa_fp16():
     assert (outs[0] - outs[1]).norm() / outs[0].norm() < 1e-2
     for a, b in zip(*grads):
         assert (a - b).norm() / a.norm() < 1e-2
+
+
+def rank1_tiny():
+    cfg = tiny()
+    cfg["model"]["memory_layers"] = [1, 2]
+    cfg["model"]["memory_overrides"] = {1: {"rank1": {"dim": 8}}, 2: {"mem_dim": 8}}
+    return cfg
+
+
+def test_memory_overrides_and_rank1_shapes():
+    model = Transformer(rank1_tiny()["model"])
+    m1, m2 = model.blocks[1].memory, model.blocks[2].memory
+    assert m1.rank1_dim == 8 and m2.rank1_dim == 0
+    assert m1.module.memory_dim == 16 and m2.module.memory_dim == 8
+    assert m1.rank1_tables["ngram_3"].weight.shape == (4 * 16**3, 16)
+    # rank-1 tables are counted as memory tables and trained like tables
+    counts = count_params(model)
+    rank1 = sum(p.numel() for p in m1.rank1_tables.parameters())
+    v2 = sum(p.numel() for m in (m1, m2) for p in m.module.tables.parameters())
+    assert counts["memory_tables"] == v2 + rank1
+    opt = build_optimizer(model, rank1_tiny()["train"], torch.device("cpu"), zero1=False)
+    tables = {id(p) for g in opt.param_groups if g["group"] == "tables" for p in g["params"]}
+    assert {id(p) for p in m1.rank1_tables.parameters()} <= tables
+
+
+def test_rank1_zero_at_init_and_causal():
+    torch.manual_seed(0)
+    model = Transformer(rank1_tiny()["model"]).eval()
+    mem = model.blocks[1].memory
+    h = torch.randn(2, 32, 64)
+    hn = model.blocks[1].attn_norm(h)
+    codes = mem.module.quantize_route_logits(mem.route_logits(hn))
+    assert torch.count_nonzero(mem._rank1(hn, codes)) == 0  # U_out zero-init
+    torch.nn.init.normal_(mem.rank1_out.weight, std=0.02)
+    nontrivial_memory(model)
+    x = torch.randint(0, 256, (2, 32))
+    x2 = x.clone()
+    x2[:, 20] = (x2[:, 20] + 1) % 256
+    with torch.no_grad():
+        a, b = model(x), model(x2)
+    assert torch.equal(a[:, :20], b[:, :20]) and not torch.allclose(a[:, 20:], b[:, 20:])
+
+
+def test_rank1_gradient_flow():
+    torch.manual_seed(0)
+    cfg = rank1_tiny()
+    model = Transformer(cfg["model"]).train()
+    opt = build_optimizer(model, dict(cfg["train"], lr=3e-3), torch.device("cpu"), zero1=False)
+    for _ in range(5):
+        x = torch.randint(0, 256, (4, 33))
+        _, loss = model(x[:, :-1], x[:, 1:])
+        opt.zero_grad()
+        loss.backward()
+        opt.step()
+    mem = model.blocks[1].memory
+    for name, p in [("rank1_out", mem.rank1_out.weight), ("rank1_in", mem.rank1_in.weight)] + [
+        (f"rank1_table_{k}", t.weight) for k, t in mem.rank1_tables.items()
+    ]:
+        assert p.grad is not None and float(p.grad.abs().sum()) > 0, name
+
+
+def test_rank1_config_is_param_matched():
+    from ffnmem.params import check_match, model_counts
+
+    ref = model_counts(load_config(CFG / "w1_mem_full.yaml")["model"])["non_embedding"]
+    counts = model_counts(load_config(CFG / "w2_mem_rank1.yaml")["model"])
+    check_match(counts, ref)
+    assert counts["non_embedding"] == 369_767_808

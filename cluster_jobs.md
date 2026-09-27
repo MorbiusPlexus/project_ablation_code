@@ -45,14 +45,18 @@ Times are cluster clock (IST).
 | 2026-09-26 20:41 | 2717521 | sparsh | plafnet2 | gnode114 | w1_dense_cut_near | **run 5**; 2x3090 (NPROC=2), micro_batch 4, ckpt every 500 | running |
 | 2026-09-26 20:52 | 2717537 | aditya | u22 | gnode078 (pinned) | w1_mem_cut_far | **run 3**; starts after 2717512 succeeds (afterok); env and data already on gnode078, so no gnode066 holder needed | pending (dependency) |
 | 2026-09-27 14:27 | 2718727 | sparsh | plafnet2 | gnode118 | morbius_probe | 4x3090: memory zero-out probe + per-token dumps on run 1/2 step-2000 checkpoints (run 1 file relayed via laptop) | done, cancelled ~15:15 |
+| 2026-09-27 19:35 | 2719088 | sparsh | plafnet2 | gnode113 | w2_mem_rank1 | idea A (rank-1 add-on) | **failed**: gnode113 exposes only 1 of 2 allocated GPUs (`invalid device ordinal`); cancelled, gnode113 excluded |
+| 2026-09-27 19:44 | 2719140 | sparsh | plafnet2 | gnode115 | w2_mem_rank1 | **wave 2 idea A**: 2x3090 (NPROC=2), micro_batch 4, ckpt 500; code in `~/morbius_w2`, staged from gnode114 | running, ETA ~29 Sep 01:00 |
 
 Not ours:
 - 2717256 (aditya, interactive on gnode066) was ended by the user.
 - 2717341 (sparsh, `anlp_a2_part3`, u22 gnode042, 1 GPU) ended by 19:20, so sparsh's u22 quota is free.
 
 gnode066 is the data/env source only: GPU0 reports "Unknown Error".
+gnode113 (plafnet2) is faulty: it shows only 1 of the 2 allocated GPUs. Exclude it.
 
 ## Where things are
+- **Wave-2 code:** `~/morbius_w2` (sparsh). It is separate from `~/morbius`, so wave-1 jobs, including queued run 3, keep the wave-1 code. Submit with `--export=ALL,NPROC=2,MORBIUS_DIR=$HOME/morbius_w2,SRC_NODE=gnode114,SRC_ENV=/ssd_scratch/sparsh.bhartia/morbius/python,SRC_DATA=/ssd_scratch/sparsh.bhartia/morbius/climbmix`.
 - **Run dirs:** `<node>:/ssd_scratch/<user>/morbius/runs/<config>/` holds checkpoints and `logs/train.jsonl`.
 - **Slurm output:** `~/morbius/joblogs/<config>-<jobid>.out`.
 - **wandb:** https://wandb.ai/ad1tya2-iiit-hyderabad/morbius-wave1. `w1_mem_full-3a5981e5` there is the 4-step smoke test, not run 1.
