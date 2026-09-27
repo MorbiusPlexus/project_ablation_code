@@ -116,6 +116,58 @@ model:
 ```
 Its dense twin (same cut on the 4256 base, no memory) is needed to read the cut × memory interaction, as with runs 4 and 5.
 
+## 5c. User's memory-readout ideas (recorded 2026-09-27)
+
+### Idea A: per-entry rank-1 matrix *added to* the v2 readout, not replacing it
+
+Keep the Lngram v2 readout unchanged: shared W_KV, GQA over routes, Sink, conv.
+- Each table row additionally stores two vectors, u_i and w_i.
+- Together they act as a tiny rank-1 matrix A_i = u_i w_iᵀ applied to the hidden state: out_i = u_i · φ(w_iᵀ h).
+- The layer output becomes: v2 readout + Σ_i g_i · u_i φ(w_iᵀ h).
+- Here g_i is the v2 route weight (reusing its softmax, so the Sink still switches it off), or a separate gate.
+
+**Why add it rather than replace v2:**
+- The shared W_KV keeps its role as a common, well-trained decoder.
+- The rank-1 term only has to carry what the shared projection can't: a key/value decoupled per entry, and a per-entry transformation of h rather than a fixed vector.
+- It starts as a pure add-on. Zero-init u_i, so the model at init equals v2.
+
+**Rank ladder:** A_i = U_i W_iᵀ with k columns (rank k) is a k-hidden-unit mini-FFN per entry (PEER / UltraMemV2 style). Try k = 1 first, then raise it if it helps.
+
+**Bytes:** 2·r·d per entry, with r = rank and d = the dimension u and w live in (e.g. 64 in a per-head space). At equal total bytes this must be paid for by a smaller table (fewer routes or smaller mem_dim), or reported as extra parameters.
+
+**Nonlinearity φ:** SiLU on w_iᵀ h, or none. UltraMemV2 found no activation acceptable. With g_i from the softmax, the extra term is already gated, so φ is optional.
+
+### Idea B: shared low-rank matrix per group of nearby entries, combined with a per-entry rank-1 matrix
+
+**Structure:**
+- A rank-~10 matrix S_g is shared by a small group g of "nearby" entries.
+- Each entry also has its own rank-1 part u_i w_iᵀ.
+- The shared part captures what the neighbourhood has in common; the rank-1 part specialises each entry. This is a hierarchical "shared base + per-entry delta", like LoRA per entry on top of a group basis.
+
+**Two readings of "multiplied":**
+1. **Additive:** A_i = S_g + u_i w_iᵀ. The effective rank is up to 11; group features plus an entry-specific direction.
+2. **Composed:** out_i = u_i · (w_iᵀ S_g h). The shared S_g first maps h into a group-specific feature space, then the entry's rank-1 reads one direction out of it. The effective rank per entry stays 1, but it lives in a learned group subspace.
+   - Note: a plain product of a rank-10 and a rank-1 matrix has rank ≤ 1. So the composed form gains expressiveness through S_g's input transform, not through rank.
+
+**What "nearby" can mean** (all natural in Lngram addressing):
+- Same route and same (n−1)-gram prefix: siblings that differ only in the newest token's code.
+- Codes within Hamming distance 1. These are exactly the neighbours the counterfactual surrogate compares, so sharing may also smooth the router's gradient.
+- The same code across the 2-gram and 3-gram tables of a route.
+
+**Bytes per entry:** 2·10·d / G for the shared part (G = group size) + 2·d for the rank-1 part. Grouping is what makes rank 10 affordable.
+
+**Why it might help:**
+- Rarely hit entries borrow statistical strength from their group through S_g.
+- Frequent entries still get a private direction.
+- This addresses the main risk of pure per-entry parameters (noisy, under-trained rows) while keeping specialisation.
+
+**Order to test:**
+1. Idea A with rank 1, added to v2 (the cheapest clean arm).
+2. Idea A with rank k.
+3. Idea B, additive form, grouping by (n−1)-gram prefix.
+
+Each needs an equal-bytes or clearly labelled extra-parameter comparison against v2.
+
 ## 6. Wave-2 candidates (pick after wave 1)
 
 - The two-fat-then-cut architecture (§5b), gated by the run 3 decision point (§5a).
