@@ -62,7 +62,9 @@ This protects both the tokens that need rebuilding (H1) and the integration step
 - If run 3 ≈ run 2, location isn't the lever; look at cut depth or destination instead.
 - Don't finalise the variant until run 3 reports.
 
-## 5a. DECISION POINT: run 3 vs run 2 (recorded 2026-09-27)
+## 5a. DECISION POINT: run 3 vs run 2 (recorded 2026-09-27; RESOLVED 2026-09-29)
+
+> **Outcome:** run 3 (far cut) = 2.790, run 2 (near cut) = 2.791 at 2B tokens; matched-step curves are within ±0.002 throughout. That is the "run 3 ≈ run 2" row: **location isn't the lever**. Wave 2 should vary cut depth (Δ = 640 / spread cut) and destination (freed → table, or cut without widening) rather than location. The "two fat FFNs then cut" architecture (§5b) is a location variant, so it is deprioritised by this rule; revisit only if the per-layer importance profile (§7) says otherwise.
 
 **When:** run 3 (`w1_mem_cut_far`, job 2717537) starts on gnode078 after run 1 finishes (~27 Sep 21:30). Its first comparable evals follow; the final call is at matched steps (1000 / 2000 / final 3815).
 
@@ -138,6 +140,8 @@ Keep the Lngram v2 readout unchanged: shared W_KV, GQA over routes, Sink, conv.
 **Nonlinearity φ:** SiLU on w_iᵀ h, or none. UltraMemV2 found no activation acceptable. With g_i from the softmax, the extra term is already gated, so φ is optional.
 
 ### Idea A as implemented: `w2_mem_rank1`, launched 27 Sep 19:44 (job 2719140, gnode115)
+
+> **Result (2026-09-29):** final val 2.807 vs run 1's 2.805, so **no gain**. The rank-1 output settled at ~7% of residual norm. Next if pursued: ablation (a) (layer 11 halved alone) to check whether the budget move cancelled a real rank-1 gain; a larger rank or dimension; gating by v2 route weights.
 
 Results are in `state_and_results.md` (wave 2). **How it differs from the idea as written above:**
 
@@ -217,8 +221,10 @@ Each needs an equal-bytes or clearly labelled extra-parameter comparison against
 - Running: runs 2, 3, 5 and idea A.
 - Finished: runs 1 and 4.
 
+**Status 2026-09-29: all wave-1 runs and idea A are finished; nothing is running.**
+
 **Open choices for the user**
-- **Matched baseline for idea A.** Run 1's config on 2× 3090 (gnode116 is idle) removes the GPU-type confound and gives a first run-to-run noise estimate. Not launched.
+- **Matched baseline for idea A.** Moot as a tiebreaker, since idea A ≈ run 1. A same-config replicate would still give the study's first measured noise floor, which matters because several conclusions hinge on 0.01–0.03 differences.
 - **Replicate run 5** (spike). Lower priority now that run 5 recovered fully.
 - **Document-boundary masking** (the paper's choice; off in all our runs). A later run could test it; switching now would break comparability.
 - **Wave-2 cut design.** Waits for run 3 (§5a) and the per-layer importance profile (§7).
@@ -229,8 +235,9 @@ Each needs an equal-bytes or clearly labelled extra-parameter comparison against
 - **Decision (user):** there is no value in resuming these runs later, because the cosine schedule has ended and the loss has plateaued. Home gets the final **fp32 model weights + config + step only** (no optimizer state), uncompressed, ~1.5 GiB per run.
   - Measured: lossless compression saves only 7–10% (14–18% with byte shuffle), because 3 of every 4 fp32 bytes are random mantissa bits. So it isn't used.
 - **Tool:** `slurm/save_final.sh <cfg>`. A tiny CPU job pinned to the run's node saves `~/morbius/final_ckpts/<cfg>_step3815.pt`; jobs are queued with `afterok` on each run.
-- **Done:** run 1 (verified tensor-identical to the source) and run 4.
-- **Queued:** runs 2, 3, 5 and A (see `cluster_jobs.md`).
+- **Done for all six runs** (2026-09-29). Run 1 was verified tensor-identical to its source.
+  - Aditya's home: runs 1 and 3 (~22 GB used).
+  - Sparsh's home: runs 2, 4, 5 and A (~25 GB used).
 - **Full resumable checkpoints** stay on node ssd for now. They can be deleted once the post-hoc analyses no longer need them (the kept steps 1000/2000/3000 are useful for §7).
 
 **Old notes (kept for context):** the original instruction was to copy only at the end.

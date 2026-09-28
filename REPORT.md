@@ -177,9 +177,7 @@ Config S fits at seq 2048 on both GPU types, so no mitigation (shorter sequences
 
 Launched 2026-09-26 ~20:33–20:41 IST. The **live** job state, all loss curves, diagnostics and probe results are in `state_and_results.md`. Job ids and nodes are in `cluster_jobs.md`. Things to look at later are in `important_notes.md`.
 
-**At the time of writing (2026-09-27 22:41):**
-- Runs 1 and 4 are finished: final val 2.805 (memory) vs 2.802 (dense).
-- Runs 2 and 5 finish overnight; run 3 is running; wave-2 idea A is running.
+**All runs are finished (2026-09-29).** Final results and conclusions are at the top of `state_and_results.md`. Final weights of all six runs are in `~/morbius/final_ckpts/`.
 
 **Operational notes**
 - **Checkpoints and resume.** Checkpoints are on node-local ssd, so resuming needs the same node (re-submit with `-w <node>`). If a node dies, that run restarts from scratch unless a checkpoint was copied off. Final checkpoints are copied to home by hand at the end (`important_notes.md` §9).
@@ -225,6 +223,7 @@ A check against the Lngram v2 paper (arXiv 2609.03426: §2.2–2.5, App. A.3–A
 | 26 Sep, local | every text file in the repo (including the vendored module and the user's scripts) was silently converted to CRLF by something outside our edits; `sbatch` rejected the job script | converted back to LF; vendored file re-verified by git blob hash |
 | 27 Sep, cluster | gnode113 exposes only 1 of 2 allocated GPUs (`invalid device ordinal`) | job cancelled, gnode113 excluded |
 | 27 Sep, cluster | a separate wave-2 code copy (`~/morbius_w2`) was an unnecessary split | unified into `~/morbius`; `~/morbius_w2` is a symlink |
+| 29 Sep, cluster | **caused by the unification above:** replacing the `~/morbius_w2` directory deleted the working directory of running job 2719140. Training completed normally (final checkpoint saved), but `wandb.finish()` calls `os.getcwd()` and crashed, so the job exited 1. That blocked its `afterok` save job | save re-run by hand (job 2722102); `Logger.close` now catches wandb teardown errors. Lesson: never delete or replace a directory a running job uses |
 
 ## 11. How the Lngram v2 readout works, and the rank-1 idea (design notes)
 

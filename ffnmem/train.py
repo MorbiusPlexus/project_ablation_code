@@ -250,7 +250,10 @@ class Logger:
         if self.tb is not None:
             self.tb.close()
         if self.wandb is not None:
-            self.wandb.finish()
+            try:
+                self.wandb.finish()
+            except Exception as e:  # never let logging teardown fail a finished run (exit code gates afterok jobs)
+                print(f"[log] wandb.finish failed: {e!r}", flush=True)
 
 
 # -------------------------------------------------------------------- eval
