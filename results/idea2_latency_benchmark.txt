@@ -1,0 +1,21 @@
+================================================================================
+SUB-TASK 2A: STANDALONE HOST-RAM MEMORY LATENCY BENCHMARK (RTX 3090)
+================================================================================
+Device: NVIDIA GeForce RTX 3090
+Decode tokens: 512 | Warmup: 50 | Batch size: 1
+Backbone: 24 layers, d_model=1024 | Table parameters: 102,498,304 (~195.5 MB in FP16)
+Routes per token: 184 (fetching 368 rows of dim 128 per token)
+================================================================================
+
+FINAL BENCHMARK SUMMARY TABLE (BATCH SIZE = 1 TOKEN DECODING)
+================================================================================
+Condition                           Latency (us)    Overhead (%)    Speedup vs Sync
+--------------------------------------------------------------------------------
+On-GPU Baseline (VRAM)                    3486.5            0.0%            1.23x
+Synchronous Host-RAM (Delta=0)            4274.6           22.6%            1.00x
+Async Delayed Host-RAM (Delta=1)          4340.6           24.5%            0.98x
+Async Delayed Host-RAM (Delta=2)          4339.2           24.5%            0.99x
+Async Delayed Host-RAM (Delta=4)          4337.0           24.4%            0.99x
+--------------------------------------------------------------------------------
+Memory Footprint: Resident GPU VRAM Saved = 195.5 MB (offloaded to Host CPU DRAM)
+================================================================================

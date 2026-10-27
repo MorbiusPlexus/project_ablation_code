@@ -1,0 +1,8 @@
+# Point 2: Delayed memory injection (Delta = 4)
+# Memory key computed at Layer 1; residual injection delayed to Layer 1 + 4 = Layer 5 (before attention).
+# Concentrated R=184 routing capacity at Layer 1 matching w2_mem_super1 and w1_mem_cut_near.
+extends: w2_mem_super1.yaml
+name: w2_mem_delayed4
+params: {reference: false, expected_non_embedding: 369777920}
+model:
+  memory_delay: 4

@@ -8,3 +8,6 @@ data_local/
 *.npy
 *.pt
 *.tmp
+*.aux
+*.log
+*.out

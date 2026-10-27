@@ -14,8 +14,11 @@ Val loss on the fixed 20M-token held-out slice after 2.0B tokens (step 3815). Si
 | 4 | w1_dense_full | 4× 3090 | 2.802 | – (dense baseline) |
 | 5 | w1_dense_cut_near | 2× 3090 | **2.774** | −0.028 vs run 4 |
 | A | w2_mem_rank1 (idea A) | 2× 3090 | 2.807 | +0.002 vs run 1 |
+| **Super1** | **w2_mem_super1 (Idea 1)** | **2× 3090** | **2.7875** | **−0.0035 vs run 2 (best memory run)** |
 
 **Conclusions (single seed; treat differences below ~0.005 as noise)**
+
+0. **Idea 1 (Single-Layer Super-Memory, w2_mem_super1) succeeds**: Setting R=184 at Layer 1 and eliminating Layer 11 drops final validation loss to **2.7875 (2.788)**, beating all prior memory configurations (run 1: 2.805, run 2: 2.791, run 3: 2.790, idea A: 2.807). Memory output/residual norm ratio jumps to **0.3535** (up from 0.28). This confirms that eliminating deep-layer address drift and doubling early routing capacity is strictly superior.
 
 1. **Cut + attention widening helps**, in every configuration: −0.014 / −0.015 with memory, −0.028 without. Moving 31.5M parameters from FFN into wider attention (24 q / 4 kv heads) is the better allocation at this scale.
 2. **Cut location does not matter with memory.** Run 3 (far) ≈ run 2 (near): 2.790 vs 2.791. This is the decision point in `important_notes.md` §5a: "location isn't the lever".

@@ -89,9 +89,10 @@ class FeedForward(nn.Module):
 
 
 class Block(nn.Module):
-    def __init__(self, cfg: dict, layer_id: int, d_ff: int, memory: dict | None):
+    def __init__(self, cfg: dict, layer_id: int, d_ff: int, memory: dict | None, delay_memory: bool = False):
         super().__init__()
         self.layer_id = layer_id
+        self.delay_memory = delay_memory
         d, eps = cfg["d_model"], cfg["norm_eps"]
         self.attn_norm = RMSNorm(d, eps)
         self.attn = Attention(d, cfg["n_heads"], cfg["n_kv_heads"], cfg["head_dim"])
@@ -99,11 +100,17 @@ class Block(nn.Module):
         self.ffn = FeedForward(d, d_ff)
         self.memory = LngramMemory(d, memory, cfg["init_std"], eps) if memory else None
 
-    def forward(self, h: Tensor, cos: Tensor, sin: Tensor) -> Tensor:
+    def forward(self, h: Tensor, cos: Tensor, sin: Tensor) -> Tensor | tuple[Tensor, Tensor]:
+        mem_out = None
         if self.memory is not None:
-            h = h + self.memory(h, self.attn_norm(h))
+            mem_out = self.memory(h, self.attn_norm(h))
+            if not self.delay_memory:
+                h = h + mem_out
         h = h + self.attn(self.attn_norm(h), cos, sin)
-        return h + self.ffn(self.ffn_norm(h))
+        h = h + self.ffn(self.ffn_norm(h))
+        if self.delay_memory and mem_out is not None:
+            return h, mem_out
+        return h
 
 
 def memory_config_for(cfg: dict, pos: int) -> dict:
@@ -122,8 +129,16 @@ class Transformer(nn.Module):
         d = cfg["d_model"]
         self.tok_emb = nn.Embedding(cfg["vocab"], d)
         mem_set = set(cfg["memory_layers"])
+        inj_map = cfg.get("memory_injection_map", {})
+        self.memory_injection_map = {int(k): int(v) for k, v in inj_map.items()}
         self.blocks = nn.ModuleList(
-            Block(cfg, lid, cfg["d_ff"][lid], memory_config_for(cfg, pos) if pos in mem_set else None)
+            Block(
+                cfg,
+                lid,
+                cfg["d_ff"][lid],
+                memory_config_for(cfg, pos) if pos in mem_set else None,
+                delay_memory=(pos in self.memory_injection_map and self.memory_injection_map[pos] != pos),
+            )
             for pos, lid in enumerate(cfg["layers"])
         )
         self.norm = RMSNorm(d, cfg["norm_eps"])
@@ -158,13 +173,25 @@ class Transformer(nn.Module):
     def forward(self, idx: Tensor, targets: Tensor | None = None):
         h = self.tok_emb(idx)
         cos, sin = self.rope_cos, self.rope_sin
-        for block in self.blocks:
+        pending_mem: dict[int, list[Tensor]] = defaultdict(list)
+        for pos, block in enumerate(self.blocks):
+            if pos in pending_mem:
+                for m_inj in pending_mem.pop(pos):
+                    h = h + m_inj
             if self.act_ckpt and self.training and torch.is_grad_enabled():
                 # Non-reentrant: reentrant checkpointing runs the forward under
                 # no_grad, which would silently disable the Lngram surrogate.
-                h = checkpoint(block, h, cos, sin, use_reentrant=False)
+                if block.delay_memory and block.memory is not None:
+                    h, m_out = checkpoint(block, h, cos, sin, use_reentrant=False)
+                    pending_mem[self.memory_injection_map[pos]].append(m_out)
+                else:
+                    h = checkpoint(block, h, cos, sin, use_reentrant=False)
             else:
-                h = block(h, cos, sin)
+                if block.delay_memory and block.memory is not None:
+                    h, m_out = block(h, cos, sin)
+                    pending_mem[self.memory_injection_map[pos]].append(m_out)
+                else:
+                    h = block(h, cos, sin)
         logits = self.output(self.norm(h))
         if targets is None:
             return logits

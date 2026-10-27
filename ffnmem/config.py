@@ -86,6 +86,22 @@ def resolve_model(model: dict) -> dict:
     for pos in m["memory_overrides"]:
         if pos not in m["memory_layers"]:
             raise ValueError(f"memory_overrides for position {pos}, which is not a memory layer {m['memory_layers']}")
+    delay = m.get("memory_delay", 0)
+    delays = m.get("memory_delays") or {}
+    memory_injection_map: dict[int, int] = {}
+    for pos in m["memory_layers"]:
+        if pos in delays:
+            target = int(delays[pos])
+        elif delay:
+            target = pos + int(delay)
+        else:
+            target = pos
+        if target >= len(m["layers"]):
+            raise ValueError(
+                f"memory injection target layer {target} >= total layers {len(m['layers'])} (delay {delay})"
+            )
+        memory_injection_map[pos] = target
+    m["memory_injection_map"] = memory_injection_map
     m.setdefault("head_dim", 64)
     m.setdefault("norm_eps", 1e-5)
     m.setdefault("rope_theta", 10000.0)

@@ -1,0 +1,10 @@
+extends: w1_mem_cut_near.yaml
+name: w2_mem_super1
+params: {reference: false, expected_non_embedding: 369777920}
+model:
+  memory_layers: [1]
+  memory:
+    routes: 184
+    mem_dim: 128
+    kv_heads: 4
+    head_dim: 64

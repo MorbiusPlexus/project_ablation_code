@@ -1,0 +1,1 @@
+{"label": "super1_active", "ckpt": "/home2/sparsh.bhartia/morbius/final_ckpts/w2_mem_super1_step3815.pt", "step": 3815, "config": "w2_mem_super1", "zero": [], "memory_layers": [1], "val_loss": 2.787500189953563, "val_tokens": 19998720, "mem_out_to_residual_norm": {"1": 0.35345457319740775}, "seconds": 550.8, "val_ppl": 16.240371173014914}
