@@ -1,0 +1,27 @@
+job 40052 w2_mem_delayed4 on gnode118 at Mon Oct 26 01:31:01 PM IST 2026; out=/ssd_scratch/sparsh.bhartia/morbius/runs/w2_mem_delayed4 data=/ssd_scratch/sparsh.bhartia/morbius/climbmix
+index, name, memory.total [MiB]
+0, NVIDIA GeForce RTX 3090, 24576 MiB
+[params] w2_mem_delayed4: embedding=33,554,432, attention=88,080,384, ffn=176,160,768, norms=50,176, memory_tables=102,498,304, memory_readout=2,988,288, total=403,332,352, non_embedding=369,777,920, active_non_embedding_per_token=267,326,720
+[resume] no checkpoint found; starting fresh
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from /home2/sparsh.bhartia/.netrc.
+wandb: W&B API key is configured. Use `wandb login --relogin` to force relogin
+wandb: setting up run w2_mem_delayed4-a1b45d9a
+wandb: Tracking run with wandb version 0.30.0
+wandb: Run data is saved locally in /ssd_scratch/sparsh.bhartia/morbius/runs/w2_mem_delayed4/logs/wandb/run-20261026_133115-w2_mem_delayed4-a1b45d9a
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run w2_mem_delayed4
+wandb: ⭐️ View project at https://wandb.ai/ad1tya2-iiit-hyderabad/morbius-wave1
+wandb: 🚀 View run at https://wandb.ai/ad1tya2-iiit-hyderabad/morbius-wave1/runs/w2_mem_delayed4-a1b45d9a
+/scratch/sparsh.bhartia/morbius/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/site-packages/torch/nn/functional.py:2954: UserWarning: Mismatch dtype between input and weight: input dtype = c10::Half, weight dtype = float, Cannot dispatch to fused implementation. (Triggered internally at /pytorch/aten/src/ATen/native/layer_norm.cpp:344.)
+  return torch.rms_norm(input, normalized_shape, weight, eps)
+step=1 loss=10.6 lr=6e-06 grad_norm=14.35 scale=6.554e+04 tokens=524288 tok_per_s=8073 elapsed_s=64.94 peak_mem_gb=10.21 peak_reserved_gb=13.14
+step=10 loss=8.926 lr=6e-05 grad_norm=1.889 scale=6.554e+04 tokens=5242880 tok_per_s=7997 elapsed_s=655 peak_mem_gb=13.22 peak_reserved_gb=16.27
+step=20 loss=8.133 lr=0.00012 grad_norm=1.838 scale=6.554e+04 tokens=10485760 tok_per_s=8005 elapsed_s=1310 peak_mem_gb=13.22 peak_reserved_gb=16.27
+step=30 loss=7.429 lr=0.00018 grad_norm=0.8897 scale=6.554e+04 tokens=15728640 tok_per_s=7990 elapsed_s=1966 peak_mem_gb=13.22 peak_reserved_gb=16.27
+step=40 loss=7.141 lr=0.00024 grad_norm=2.681 scale=6.554e+04 tokens=20971520 tok_per_s=7972 elapsed_s=2624 peak_mem_gb=13.22 peak_reserved_gb=16.27
+step=50 loss=6.855 lr=0.0003 grad_norm=1.168 scale=6.554e+04 tokens=26214400 tok_per_s=7969 elapsed_s=3282 peak_mem_gb=13.22 peak_reserved_gb=16.27
+step=60 loss=6.598 lr=0.00036 grad_norm=1.545 scale=6.554e+04 tokens=31457280 tok_per_s=7968 elapsed_s=3940 peak_mem_gb=13.22 peak_reserved_gb=16.27
+step=70 loss=6.538 lr=0.00042 grad_norm=4.005 scale=6.554e+04 tokens=36700160 tok_per_s=7977 elapsed_s=4597 peak_mem_gb=13.22 peak_reserved_gb=16.27
+step=80 loss=6.38 lr=0.00048 grad_norm=1.249 scale=6.554e+04 tokens=41943040 tok_per_s=7974 elapsed_s=5254 peak_mem_gb=13.22 peak_reserved_gb=16.27
+step=90 loss=6.212 lr=0.00054 grad_norm=1.599 scale=6.554e+04 tokens=47185920 tok_per_s=7979 elapsed_s=5911 peak_mem_gb=13.22 peak_reserved_gb=16.27
+[2026-10-26T15:14:23.115] error: *** JOB 40052 ON gnode118 CANCELLED AT 2026-10-26T15:14:23 DUE to SIGNAL Terminated ***
