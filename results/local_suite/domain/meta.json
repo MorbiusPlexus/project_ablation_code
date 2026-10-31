@@ -1,0 +1,17 @@
+{
+  "dataset": "domain",
+  "vocab_size": 32768,
+  "eos_id": 2,
+  "dtype": "uint16",
+  "byte_order": "little",
+  "val_file": "val.bin",
+  "val_tokens": 96,
+  "shards": [
+    {
+      "file": "shard_00000.bin",
+      "tokens": 384
+    }
+  ],
+  "total_tokens": 384,
+  "complete": true
+}

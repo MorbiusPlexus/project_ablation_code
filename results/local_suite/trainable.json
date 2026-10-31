@@ -1,0 +1,27 @@
+{
+  "all": {
+    "spec": "all",
+    "trainable": 454624,
+    "frozen": 0
+  },
+  "backbone": {
+    "spec": "backbone",
+    "trainable": 164416,
+    "frozen": 290208
+  },
+  "memory": {
+    "spec": "memory",
+    "trainable": 290208,
+    "frozen": 164416
+  },
+  "tables": {
+    "spec": "tables",
+    "trainable": 278528,
+    "frozen": 176096
+  },
+  "ffn_layers:0,1": {
+    "spec": "ffn_layers:0,1",
+    "trainable": 49152,
+    "frozen": 405472
+  }
+}

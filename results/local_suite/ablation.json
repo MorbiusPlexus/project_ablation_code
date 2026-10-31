@@ -1,0 +1,62 @@
+{
+  "zero": {
+    "full": 5.5316587175641745,
+    "ablated": 5.5316587175641745,
+    "retention": 1.0
+  },
+  "mean": {
+    "full": 5.5316587175641745,
+    "ablated": 5.5316587175641745,
+    "retention": 1.0
+  },
+  "logitlens": [
+    0.02042340114712715,
+    0.012739896774291992,
+    0.006445665378123522,
+    0.0
+  ],
+  "cka_self_diag": 1.0,
+  "soft_align": [
+    1.4037035703659058,
+    1.472164273262024,
+    1.5421898365020752,
+    1.5926839113235474
+  ],
+  "propagation": {
+    "per_layer": [
+      {
+        "layer": 0,
+        "R": 0.0,
+        "retention": 0.0
+      },
+      {
+        "layer": 1,
+        "R": 0.0,
+        "retention": 0.0
+      },
+      {
+        "layer": 2,
+        "R": 0.0,
+        "retention": 0.0
+      },
+      {
+        "layer": 3,
+        "R": 0.0,
+        "retention": 0.0
+      }
+    ],
+    "js": -7.450580596923828e-09,
+    "top1_agreement": 1.0,
+    "logit_R": 0.0
+  },
+  "codes": {
+    "1": {
+      "sink_mass": 0.49957790970802307,
+      "eff_codes_mean": 9.385152354486008,
+      "frac_routes_eff_lt4": 0.0,
+      "frac_routes_eff_lt2": 0.0,
+      "dead_code_frac": 0.359375,
+      "top_code_share": 0.1875
+    }
+  }
+}

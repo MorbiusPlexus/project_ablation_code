@@ -1,0 +1,2 @@
+{"context": "import numpy as", "target": " np", "category": "code"}
+{"context": "for i in range(", "target": "10", "category": "code"}

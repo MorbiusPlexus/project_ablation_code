@@ -1,0 +1,73 @@
+model:
+  d_model: 64
+  n_layers: 4
+  n_heads: 4
+  n_kv_heads: 2
+  head_dim: 16
+  vocab: 256
+  seq_len: 32
+  d_ff:
+  - 128
+  - 128
+  - 128
+  - 128
+  memory_layers:
+  - 1
+  memory:
+    routes: 4
+    mem_dim: 16
+    kv_heads: 2
+    q_heads: 4
+    head_dim: 16
+    execution_mode: full
+  norm_eps: 1.0e-05
+  rope_theta: 10000.0
+  init_std: 0.02
+  layers:
+  - 0
+  - 1
+  - 2
+  - 3
+  memory_overrides: {}
+  memory_injection_map:
+    1: 1
+train:
+  seed: 1234
+  data_seed: 1234
+  data_dir: results/local_suite/domain256
+  val_tokens: 200
+  global_batch: 8
+  micro_batch: 2
+  tokens_total: 5120
+  lr: 0.0006
+  min_lr_ratio: 0.1
+  warmup_frac: 0.02
+  warmup_min_steps: 2
+  betas:
+  - 0.9
+  - 0.95
+  eps: 1.0e-08
+  weight_decay: 0.1
+  grad_clip: 1.0
+  table_lr_mult: 4.0
+  precision: fp32
+  act_ckpt: false
+  attn_backend: sdpa
+  zero1: false
+  ckpt_every: 10
+  keep_last: 3
+  keep_every: 1000
+  eval_every: 10
+  eval_max_batches: null
+  diag_batches: 2
+  log_every: 1
+  scaler_min: 1.0
+  scaler_patience: 100
+  nan_patience: 20
+  out_root: runs
+  trainable: memory
+  seq_len: 32
+name: tiny_cpu
+params:
+  match_reference: false
+_source: /home/bluebottle/iiit/acad/sem7/anlp/project/project_ablation_code/configs/tiny_cpu.yaml

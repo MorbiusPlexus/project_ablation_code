@@ -28,5 +28,19 @@ else
   fi
 fi
 PY=$(ls -d "$ENV_DIR"/cpython-3.12*/bin/python3.12 | head -1)
+# Eval extras live in a venv over the training env, so a training job never sees them.
+# Wheels are built on the login node by slurm/build_wheelhouse.sh.
+WHEELS=${WHEELS:-$HOME/morbius_eval/wheels}
+EVAL_PY=$PY
+REQ=${MORBIUS_DIR:-$HOME/morbius_eval}/requirements-eval.txt
+if [ -d "$WHEELS" ] && [ -f "$REQ" ] && [ ! -x "$B/evalenv/bin/python" ]; then
+  "$PY" -m venv --system-site-packages "$B/evalenv"
+  "$B/evalenv/bin/python" -m pip install --no-index -f "$WHEELS" -r "$REQ"
+  touch "$B/evalenv/.staged_eval"
+fi
+if [ -x "$B/evalenv/bin/python" ]; then
+  EVAL_PY=$B/evalenv/bin/python
+fi
 echo "ENV_PY=$PY"
 echo "DATA_DIR=$DATA_DIR"
+echo "EVAL_PY=$EVAL_PY"

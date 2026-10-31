@@ -1,0 +1,22 @@
+{
+  "all": {
+    "score": 0.5,
+    "trainable": 454624,
+    "steps": 2
+  },
+  "memory": {
+    "score": 0.5,
+    "trainable": 290208,
+    "steps": 2
+  },
+  "backbone": {
+    "score": 1.0,
+    "trainable": 164416,
+    "steps": 2
+  },
+  "tables": {
+    "score": 0.5,
+    "trainable": 278528,
+    "steps": 2
+  }
+}

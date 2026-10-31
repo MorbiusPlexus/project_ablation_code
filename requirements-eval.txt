@@ -1,0 +1,10 @@
+# Eval extras. torch stays 2.11.0+cu128, the cluster build.
+#   uv venv .venv-eval --python 3.12
+#   uv pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu128 -r requirements-eval.txt
+lm_eval==0.4.9
+datasets==3.6.0
+seqeval==1.2.2
+scikit-learn==1.7.2
+matplotlib==3.10.6
+spacy==3.8.7
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl

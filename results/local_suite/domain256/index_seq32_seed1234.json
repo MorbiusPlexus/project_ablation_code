@@ -1,0 +1,14 @@
+{
+  "seq_len": 32,
+  "seed": 1234,
+  "num_windows": 88,
+  "windows_per_shard": [
+    88
+  ],
+  "shards": [
+    "shard_00000.bin"
+  ],
+  "shard_fingerprint": "b33c637cd74952b4",
+  "dtype": "uint16",
+  "vocab_size": 256
+}

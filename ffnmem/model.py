@@ -170,10 +170,17 @@ class Transformer(nn.Module):
         return [b.memory for b in self.blocks if b.memory is not None]
 
     # --------------------------------------------------------------- forward
-    def forward(self, idx: Tensor, targets: Tensor | None = None):
+    def forward(
+        self,
+        idx: Tensor,
+        targets: Tensor | None = None,
+        return_hidden: bool = False,
+        return_layers: bool = False,
+    ):
         h = self.tok_emb(idx)
         cos, sin = self.rope_cos, self.rope_sin
         pending_mem: dict[int, list[Tensor]] = defaultdict(list)
+        layers: list[Tensor] = []
         for pos, block in enumerate(self.blocks):
             if pos in pending_mem:
                 for m_inj in pending_mem.pop(pos):
@@ -192,11 +199,21 @@ class Transformer(nn.Module):
                     pending_mem[self.memory_injection_map[pos]].append(m_out)
                 else:
                     h = block(h, cos, sin)
-        logits = self.output(self.norm(h))
+            if return_layers:
+                layers.append(h)
+        hidden = self.norm(h)
+        logits = self.output(hidden)
+        extra = None
+        if return_hidden or return_layers:
+            extra = {}
+            if return_hidden:
+                extra["hidden"] = hidden
+            if return_layers:
+                extra["layers"] = layers
         if targets is None:
-            return logits
+            return (logits, extra) if extra is not None else logits
         loss = F.cross_entropy(logits.float().view(-1, logits.shape[-1]), targets.reshape(-1))
-        return logits, loss
+        return (logits, loss, extra) if extra is not None else (logits, loss)
 
 
 # ---------------------------------------------------------------- counting

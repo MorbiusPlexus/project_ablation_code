@@ -1,0 +1,222 @@
+{
+  "scores": {
+    "induction": 0.0,
+    "passkey": 0.0,
+    "mqar": 0.0
+  },
+  "protocol": [
+    {
+      "task": "pile_bpb",
+      "shots": 0,
+      "metric": "bpb",
+      "group": "lm",
+      "status": "run"
+    },
+    {
+      "task": "climbmix_val",
+      "shots": 0,
+      "metric": "loss",
+      "group": "lm",
+      "status": "run"
+    },
+    {
+      "task": "mmlu",
+      "shots": 5,
+      "metric": "acc",
+      "group": "knowledge",
+      "status": "run"
+    },
+    {
+      "task": "arc_easy",
+      "shots": 24,
+      "metric": "acc",
+      "group": "knowledge",
+      "status": "run"
+    },
+    {
+      "task": "arc_challenge",
+      "shots": 24,
+      "metric": "acc",
+      "group": "knowledge",
+      "status": "run"
+    },
+    {
+      "task": "triviaqa",
+      "shots": 5,
+      "metric": "em",
+      "group": "knowledge",
+      "status": "run"
+    },
+    {
+      "task": "popqa",
+      "shots": 15,
+      "metric": "em",
+      "group": "knowledge",
+      "status": "run"
+    },
+    {
+      "task": "sciq",
+      "shots": 0,
+      "metric": "acc",
+      "group": "knowledge",
+      "status": "run"
+    },
+    {
+      "task": "openbookqa",
+      "shots": 0,
+      "metric": "acc",
+      "group": "knowledge",
+      "status": "run"
+    },
+    {
+      "task": "bbh",
+      "shots": 3,
+      "metric": "em",
+      "group": "reasoning",
+      "status": "run"
+    },
+    {
+      "task": "hellaswag",
+      "shots": 0,
+      "metric": "acc_norm",
+      "group": "commonsense",
+      "status": "run"
+    },
+    {
+      "task": "piqa",
+      "shots": 0,
+      "metric": "acc_norm",
+      "group": "commonsense",
+      "status": "run"
+    },
+    {
+      "task": "winogrande",
+      "shots": 5,
+      "metric": "acc",
+      "group": "commonsense",
+      "status": "run"
+    },
+    {
+      "task": "copa",
+      "shots": 0,
+      "metric": "acc",
+      "group": "commonsense",
+      "status": "run"
+    },
+    {
+      "task": "siqa",
+      "shots": 0,
+      "metric": "acc",
+      "group": "commonsense",
+      "status": "run"
+    },
+    {
+      "task": "lambada",
+      "shots": 0,
+      "metric": "acc",
+      "group": "reading",
+      "status": "run"
+    },
+    {
+      "task": "drop",
+      "shots": 1,
+      "metric": "f1",
+      "group": "reading",
+      "status": "run"
+    },
+    {
+      "task": "race",
+      "shots": 5,
+      "metric": "acc",
+      "group": "reading",
+      "status": "run"
+    },
+    {
+      "task": "boolq",
+      "shots": 0,
+      "metric": "acc",
+      "group": "reading",
+      "status": "run"
+    },
+    {
+      "task": "blimp",
+      "shots": 0,
+      "metric": "acc",
+      "group": "syntax",
+      "status": "run"
+    },
+    {
+      "task": "ruler",
+      "shots": 0,
+      "metric": "acc",
+      "group": "reading",
+      "status": "run"
+    },
+    {
+      "task": "gsm8k",
+      "shots": 5,
+      "metric": "em",
+      "group": "math",
+      "status": "floor"
+    },
+    {
+      "task": "math",
+      "shots": 4,
+      "metric": "em",
+      "group": "math",
+      "status": "floor"
+    },
+    {
+      "task": "humaneval",
+      "shots": 0,
+      "metric": "pass@1",
+      "group": "code",
+      "status": "floor"
+    },
+    {
+      "task": "mbpp",
+      "shots": 3,
+      "metric": "pass@1",
+      "group": "code",
+      "status": "floor"
+    },
+    {
+      "task": "mmlu_pro",
+      "shots": 5,
+      "metric": "acc",
+      "group": "knowledge",
+      "status": "floor"
+    },
+    {
+      "task": "cmmlu",
+      "shots": 5,
+      "metric": "acc",
+      "group": "knowledge",
+      "status": "floor"
+    },
+    {
+      "task": "ceval",
+      "shots": 5,
+      "metric": "acc",
+      "group": "knowledge",
+      "status": "floor"
+    },
+    {
+      "task": "agieval",
+      "shots": 0,
+      "metric": "acc",
+      "group": "knowledge",
+      "status": "floor"
+    },
+    {
+      "task": "c3",
+      "shots": 0,
+      "metric": "acc",
+      "group": "reading",
+      "status": "floor"
+    }
+  ],
+  "lm_eval": false,
+  "intervention": "none",
+  "limit": null
+}

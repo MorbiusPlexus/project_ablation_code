@@ -342,7 +342,11 @@ def main(argv: list[str] | None = None) -> dict:
 
     # ---- model + parameter check
     model = build_model(cfg, d.device)
+    from .trainable import apply_trainable
+
+    trainable_info = apply_trainable(model, tcfg.get("trainable", "all"))
     counts = count_params(model)
+    counts["trainable"] = trainable_info["trainable"]
     expected = cfg.get("params", {}).get("expected_non_embedding")
     if d.is_main:
         print(f"[params] {cfg['name']}: " + ", ".join(f"{k}={v:,}" for k, v in counts.items()), flush=True)
@@ -418,7 +422,8 @@ def main(argv: list[str] | None = None) -> dict:
                     "cudnn": {"enabled": torch.backends.cudnn.enabled, "benchmark": torch.backends.cudnn.benchmark,
                               "deterministic": torch.backends.cudnn.deterministic},
                     "device": str(d.device), "torch": torch.__version__,
-                    "gpu": torch.cuda.get_device_name(d.device) if d.device.type == "cuda" else None})
+                    "gpu": torch.cuda.get_device_name(d.device) if d.device.type == "cuda" else None,
+                    "trainable": trainable_info})
 
     def save(at_step: int) -> None:
         rng_all = d.all_gather_object(ckpt.rng_state())

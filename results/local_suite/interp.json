@@ -1,0 +1,38 @@
+{
+  "buckets": {
+    "other": 0.0,
+    "entity": 0.0
+  },
+  "mi": 2.1333819302645445,
+  "purity": {
+    "rows": 7,
+    "mean_purity": 1.0,
+    "example": [
+      1,
+      [
+        2,
+        3
+      ],
+      175,
+      1.0
+    ]
+  },
+  "direct": {
+    "median_rank": 1.0,
+    "random_median_rank": 132.0,
+    "top1": 0
+  },
+  "patch_denoising": {
+    "1": -0.0
+  },
+  "locality": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "id_ap": 0.41637286324786327,
+  "hidden_ap": 0.544150641025641,
+  "rho": 0.7651794041132872,
+  "perm_p": 0.25
+}

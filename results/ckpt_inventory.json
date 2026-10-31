@@ -1,0 +1,19 @@
+{
+  "host": "lastvaquita",
+  "ada_resolves": false,
+  "local_final_ckpts": [],
+  "remote_expected": {
+    "aditya": "/home/aditya.shankar/morbius/final_ckpts",
+    "sparsh": "/home2/sparsh.bhartia/morbius/final_ckpts"
+  },
+  "files": [
+    "w1_mem_full_step3815.pt",
+    "w1_mem_cut_near_step3815.pt",
+    "w1_mem_cut_far_step3815.pt",
+    "w1_dense_full_step3815.pt",
+    "w1_dense_cut_near_step3815.pt",
+    "w2_mem_rank1_step3815.pt",
+    "w2_mem_super1_step3815.pt"
+  ],
+  "note": "Phase B reads these from ada. export_local.sh makes a 4050-sized fp16 copy."
+}

@@ -1,0 +1,11 @@
+{
+  "induction": 0.0,
+  "passkey": 0.0,
+  "mqar": 0.0,
+  "next": {
+    "acc": 0.0,
+    "loss": 5.5316587175641745,
+    "bpb": 0.9975620722238684
+  },
+  "note": "tiny random init; not a trained checkpoint"
+}

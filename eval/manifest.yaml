@@ -1,0 +1,25 @@
+# Expanded by eval/submit.py. Compact source of the Phase B job list.
+# Accounts: aditya owns w1_mem_full and w1_mem_cut_far. sparsh owns the rest.
+# Faulty nodes gnode066 and gnode113 are excluded by submit.py.
+
+accounts:
+  aditya:
+    partition: u22
+    account: research
+    constraint: 2080ti
+    exclude: gnode066
+    mem: 24G
+    cpus: 8
+  sparsh:
+    partition: plafnet2
+    account: plafnet2
+    constraint: null
+    exclude: gnode113,gnode066
+    mem: 40G
+    cpus: 8
+
+ckpt_root:
+  aditya: /home/aditya.shankar/morbius/final_ckpts
+  sparsh: /home2/sparsh.bhartia/morbius/final_ckpts
+
+code_dir: ~/morbius_eval

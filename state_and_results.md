@@ -1,5 +1,7 @@
 # State and results: wave 1
 
+Evaluation, fine-tuning regimes, domain adaptation and memory interpretability are implemented on the `eval-suite` branch. The protocol, the local tiny-model run and the ada job list are in `EVAL_REPORT.md`. Phase B (`eval/submit.py`) is what runs the seven final checkpoints; this machine does not have them.
+
 Current job state, measured numbers and diagnostics. Things to look at later are in `important_notes.md`. The job log is in `cluster_jobs.md`.
 
 ## FINAL RESULTS: all runs complete (2026-09-29 02:51 IST)

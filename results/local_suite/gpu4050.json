@@ -1,0 +1,10 @@
+{
+  "gpu": "NVIDIA GeForce RTX 4050 Laptop GPU",
+  "vram_mib": 6141,
+  "decode_max_abs": 2.384185791015625e-07,
+  "offload_max_abs": 0.0,
+  "e2e_gpu_ms": 2.467,
+  "e2e_sync_ms": 2.486,
+  "peak_mem_mb": 10.39,
+  "note": "Tiny 4-layer model. Confirms incremental decode and host-RAM gather match the full forward on this GPU."
+}
